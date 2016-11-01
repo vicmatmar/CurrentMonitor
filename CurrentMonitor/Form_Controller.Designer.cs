@@ -1,6 +1,6 @@
 ﻿namespace CurrentMonitor
 {
-    partial class Form1
+    partial class Form_Controller
     {
         /// <summary>
         /// Required designer variable.
@@ -72,6 +72,8 @@
             // 
             // chart1
             // 
+            this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             chartArea1.Name = "ChartArea1";
             this.chart1.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
