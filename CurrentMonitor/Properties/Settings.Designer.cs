@@ -46,5 +46,29 @@ namespace CurrentMonitor.Properties {
                 this["Data_Port_Name"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public double Voltage_Value {
+            get {
+                return ((double)(this["Voltage_Value"]));
+            }
+            set {
+                this["Voltage_Value"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public double Voltage_Tolarance {
+            get {
+                return ((double)(this["Voltage_Tolarance"]));
+            }
+            set {
+                this["Voltage_Tolarance"] = value;
+            }
+        }
     }
 }

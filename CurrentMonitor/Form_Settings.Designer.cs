@@ -34,6 +34,10 @@
             this.textBox_dataPortName = new System.Windows.Forms.TextBox();
             this.button_ok = new System.Windows.Forms.Button();
             this.button_cancel = new System.Windows.Forms.Button();
+            this.label_voltage_value = new System.Windows.Forms.Label();
+            this.textBox_voltage_value = new System.Windows.Forms.TextBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // textBox_cmdPortName
@@ -90,6 +94,40 @@
             this.button_cancel.Text = "&Cancel";
             this.button_cancel.UseVisualStyleBackColor = true;
             // 
+            // label_voltage_value
+            // 
+            this.label_voltage_value.AutoSize = true;
+            this.label_voltage_value.Location = new System.Drawing.Point(12, 97);
+            this.label_voltage_value.Name = "label_voltage_value";
+            this.label_voltage_value.Size = new System.Drawing.Size(46, 13);
+            this.label_voltage_value.TabIndex = 7;
+            this.label_voltage_value.Text = "Voltage:";
+            // 
+            // textBox_voltage_value
+            // 
+            this.textBox_voltage_value.Location = new System.Drawing.Point(64, 94);
+            this.textBox_voltage_value.Name = "textBox_voltage_value";
+            this.textBox_voltage_value.Size = new System.Drawing.Size(34, 20);
+            this.textBox_voltage_value.TabIndex = 6;
+            this.textBox_voltage_value.Text = "3.0";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(163, 94);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(34, 20);
+            this.textBox1.TabIndex = 8;
+            this.textBox1.Text = "10";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(99, 97);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(58, 13);
+            this.label3.TabIndex = 9;
+            this.label3.Text = "Tolarance:";
+            // 
             // Form_Settings
             // 
             this.AcceptButton = this.button_ok;
@@ -97,6 +135,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_cancel;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.label_voltage_value);
+            this.Controls.Add(this.textBox_voltage_value);
             this.Controls.Add(this.button_cancel);
             this.Controls.Add(this.button_ok);
             this.Controls.Add(this.label2);
@@ -120,5 +162,9 @@
         private System.Windows.Forms.TextBox textBox_dataPortName;
         private System.Windows.Forms.Button button_ok;
         private System.Windows.Forms.Button button_cancel;
+        private System.Windows.Forms.Label label_voltage_value;
+        private System.Windows.Forms.TextBox textBox_voltage_value;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label3;
     }
 }

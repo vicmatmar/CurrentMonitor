@@ -18,54 +18,82 @@ namespace CurrentMonitor
         string _data_port_name = "COM5";
         public string DATA_Port_Name { get { return _data_port_name; } set { _data_port_name = value; } }
 
+        SerialPort _data_port;
+        public SerialPort DataPort { get { return _data_port; } }
+
+        SerialPort _cmd_port;
+        public SerialPort CmdPort { get { return _cmd_port; } }
+
+        public enum Sampling : int {Fastest=1, Fast=10, Medium=100, Slow=1000};
+
         int _baud_rate = 576600;
         string _new_line = "\r";
 
         public SerialPort OpenCmdPort()
         {
-            SerialPort port = new SerialPort(CMD_Port_Name);
-            port.BaudRate = _baud_rate;
-            port.NewLine = _new_line;
+            _cmd_port = new SerialPort(CMD_Port_Name);
+            _cmd_port.BaudRate = _baud_rate;
+            _cmd_port.NewLine = _new_line;
             int trycount = 0;
             while (true)
             {
                 try
                 {
-                    port.Open();
+                    _cmd_port.Open();
                     break;
                 }
                 catch { Thread.Sleep(500); }
 
                 if (trycount++ > 10)
                 {
-                    port.Open();
+                    _cmd_port.Open();
                 }
             }
-            return port;
+            return _cmd_port;
         }
 
         public SerialPort OpenDataPort()
         {
-            SerialPort port = new SerialPort(DATA_Port_Name);
-            port.BaudRate = _baud_rate;
-            port.NewLine = _new_line;
+            _data_port = new SerialPort(DATA_Port_Name);
+            _data_port.BaudRate = _baud_rate;
+            _data_port.NewLine = _new_line;
             int trycount = 0;
             while (true)
             {
                 try
                 {
-                    port.Open();
+                    _data_port.Open();
                     break;
                 }
                 catch { Thread.Sleep(500); }
 
                 if (trycount++ > 10)
                 {
-                    port.Open();
+                    _data_port.Open();
                 }
             }
-            return port;
+            return _data_port;
         }
+
+        public void Pause()
+        {
+            _cmd_port.WriteLine("p");
+        }
+        public void Resume()
+        {
+            _cmd_port.WriteLine("r");
+        }
+        public void Zero()
+        {
+            _cmd_port.WriteLine("z");
+        }
+
+        public void Interval(Sampling interval)
+        {
+            string cmd = string.Format("i {0}", (int)interval);
+            _cmd_port.WriteLine(cmd);
+        }
+
 
     }
 }

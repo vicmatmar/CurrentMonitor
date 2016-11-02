@@ -22,7 +22,6 @@ namespace CurrentMonitor
         delegate void updateTextboxDataCallback(string data);
         delegate void updateChartCallback(string data);
 
-        ee203 _ee203;
         SerialPort _port_cmd, _port_data;
 
         bool _isclosing = false;
