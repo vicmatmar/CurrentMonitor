@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 using System.IO.Ports;
 
@@ -23,7 +24,7 @@ namespace CurrentMonitor
 
 
         delegate void setControlPropertyValueCallback(Control control, object value, string property_name);
-        delegate void updateMeasurementsCallback(double voltage, double current);
+        delegate void updateMeasurementsCallback(string voltage_str, string current_str);
 
         public Form_Main()
         {
@@ -47,25 +48,21 @@ namespace CurrentMonitor
 
         void closePorts()
         {
-            if (_cmd_port.IsOpen)
-                _cmd_port.Close();
-            if (_data_port.IsOpen)
-                _data_port.Close();
-
+            _cmd_port.Close();
+            _data_port.Close();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form_Settings dlg = new Form_Settings();
             DialogResult res = dlg.ShowDialog();
-            if (res == DialogResult.OK)
-            {
-
-            }
         }
 
         private void Form_Main_Load(object sender, EventArgs e)
         {
+            label_current.Text = "";
+            label_voltage.Text = "";
+
             openPorts();
         }
 
@@ -79,7 +76,9 @@ namespace CurrentMonitor
                 try
                 {
                     _cmd_port = _ee203.OpenCmdPort();
-                    break;
+                    Thread.Sleep(500);
+                    if (_cmd_port.IsOpen)
+                        break;
                 }
                 catch (Exception ex)
                 {
@@ -107,61 +106,183 @@ namespace CurrentMonitor
                 //_ee203.Interval(ee203.Sampling.Fastest);
 
                 _ee203.Resume();
-
             }
         }
 
         private void _data_port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            try
+
+            string data = _data_port.ReadExisting();
+            string[] lines = data.Split(new char[] { '\r' });
+            foreach (string line in lines)
             {
-                string data = _data_port.ReadExisting();
-
-                string[] lines = data.Split(new char[] { '\r' });
-                foreach (string line in lines)
+                string[] cells = line.Split(new char[] { ',' });
+                if (cells.Length == 7)
                 {
-                    string[] cells = line.Split(new char[] { ',' });
-                    if (cells.Length == 7)
+                    try
                     {
-                        try
-                        {
-                            //string[] ts1 = cells[0].Split(new char[] { ':' });
-                            //string[] ts2 = ts1[1].Split(new char[] { '.' });
-                            //TimeSpan timestamp = new TimeSpan(0, 0, Convert.ToInt32(ts1[0]), Convert.ToInt32(ts2[0]), Convert.ToInt32(ts2[1]));
-
-
-                            double voltage = Convert.ToDouble(cells[2]);
-                            double current = Convert.ToDouble(cells[3]);
-
-                            updateMeasurements(voltage, current);
-
-                        }
-                        catch { }
-
+                        processData(cells);
+                    }
+                    catch (Exception ex)
+                    {
+                        string msg = ex.Message;
                     }
                 }
-
             }
-            catch { }
+
         }
 
-        void updateMeasurements(double voltage, double current)
+        void processData(string[] data)
         {
-            if (label_current.InvokeRequired || label_voltage.InvokeRequired)
+            //string[] ts1 = cells[0].Split(new char[] { ':' });
+            //string[] ts2 = ts1[1].Split(new char[] { '.' });
+            //TimeSpan timestamp = new TimeSpan(0, 0, Convert.ToInt32(ts1[0]), Convert.ToInt32(ts2[0]), Convert.ToInt32(ts2[1]));
+
+            //updateMeasurements(voltage_str: cells[2], current_str: cells[3]);
+
+            // Voltage
+            double voltage = Convert.ToDouble(data[2]);
+            Color forcolor = Color.Green;
+            if (voltage > _volatge_max || voltage < _volatge_min)
+                forcolor = Color.Red;
+            string text = string.Format("{0:F3} V", voltage);
+
+            SynchronizedInvoke(label_voltage, delegate () { label_voltage.ForeColor = forcolor; });
+            SynchronizedInvoke(label_voltage, delegate () { label_voltage.Text = text; });
+
+            // Current
+            string current_str = data[3];
+            string[] current_parts = current_str.Split(new char[] { 'e' });
+            string si = "";
+
+
+            if (current_parts.Length > 1)
             {
-                updateMeasurementsCallback d = new updateMeasurementsCallback(updateMeasurements);
-                this.Invoke(d, new object[] { voltage, current });
+                switch (current_parts[1])
+                {
+                    case "-03":
+                        si = "mA";
+                        break;
+                    case "-06":
+                        si = "uA";
+                        break;
+                    case "-09":
+                        si = "nA";
+                        break;
+                    case "-12":
+                        si = "p";
+                        break;
+                    case "-15":
+                        si = "f";
+                        break;
+                }
+            }
+
+            if (si != "")
+            {
+                text = current_parts[0] + " " + si;
+
             }
             else
             {
-                if (voltage > _volatge_max || voltage < _volatge_min)
-                    label_voltage.ForeColor = Color.Red;
-                else
-                    label_voltage.ForeColor = Color.Green;
+                text = current_str;
+            }
+            SynchronizedInvoke(label_current, delegate () { label_current.Text = text; });
 
-                label_voltage.Text = string.Format("{0:F2}", voltage);
+            // Checks
+            text = "Testing...";
+            forcolor = Color.Black;
+            if (voltage <= 0.001)
+            {
+                forcolor = Color.Red;
+                text = "No voltage detected.  Is power supply on and connected?";
+            }
+            SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.ForeColor = forcolor; });
+            SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.Text = text; });
 
-                label_current.Text = string.Format("{0:G2}", current);
+        }
+
+        void SynchronizedInvoke(ISynchronizeInvoke sync, Action action)
+        {
+            // If the invoke is not required, then invoke here and get out.
+            if (!sync.InvokeRequired)
+            {
+                // Execute action.
+                action();
+
+                // Get out.
+                return;
+            }
+
+            // Marshal to the required context.
+            sync.Invoke(action, new object[] { });
+        }
+
+        void updateMeasurements(string voltage_str, string current_str)
+        {
+            if (label_current.InvokeRequired || label_voltage.InvokeRequired || label_dev_status.InvokeRequired)
+            {
+                updateMeasurementsCallback d = new updateMeasurementsCallback(updateMeasurements);
+                this.Invoke(d, new object[] { voltage_str, current_str });
+            }
+            else
+            {
+                try
+                {
+                    double voltage = Convert.ToDouble(voltage_str);
+                    if (voltage > _volatge_max || voltage < _volatge_min)
+                        label_voltage.ForeColor = Color.Red;
+                    else
+                        label_voltage.ForeColor = Color.Green;
+
+                    label_voltage.Text = string.Format("{0:F3} V", voltage);
+
+                    //label_current.Text = string.Format("{0:G2}", current);
+                    string[] current_parts = current_str.Split(new char[] { 'e' });
+                    string si = "";
+                    if (current_parts.Length > 1)
+                    {
+                        switch (current_parts[1])
+                        {
+                            case "-03":
+                                si = "mA";
+                                break;
+                            case "-06":
+                                si = "uA";
+                                break;
+                            case "-09":
+                                si = "nA";
+                                break;
+                            case "-12":
+                                si = "p";
+                                break;
+                            case "-15":
+                                si = "f";
+                                break;
+                        }
+                    }
+
+                    if (si != "")
+                    {
+                        label_current.Text = current_parts[0] + " " + si; ;
+
+                    }
+                    else
+                    {
+                        label_current.Text = current_str;
+                    }
+
+                    if (voltage <= 0.001)
+                    {
+                        label_dev_status.ForeColor = Color.Red;
+                        label_dev_status.Text = "No voltage detected.  Is power supply on and connected?";
+                    }
+                }
+                catch (FormatException)
+                {
+
+                }
+
             }
 
         }
@@ -271,6 +392,5 @@ namespace CurrentMonitor
             catch { }
         }
     }
-
-
 }
+
