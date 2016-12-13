@@ -70,5 +70,17 @@ namespace CurrentMonitor.Properties {
                 this["Voltage_Tolarance"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.001")]
+        public double Voltage_Off_Threshold {
+            get {
+                return ((double)(this["Voltage_Off_Threshold"]));
+            }
+            set {
+                this["Voltage_Off_Threshold"] = value;
+            }
+        }
     }
 }

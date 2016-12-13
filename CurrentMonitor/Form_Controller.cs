@@ -22,12 +22,17 @@ namespace CurrentMonitor
         delegate void updateTextboxDataCallback(string data);
         delegate void updateChartCallback(string data);
 
-        SerialPort _port_cmd, _port_data;
+        ee203 _ee203;
+        public ee203 ee203 { get { return _ee203; } set { _ee203 = value; } }
 
         bool _isclosing = false;
 
-        public Form_Controller()
+
+
+        public Form_Controller(ee203 ee203)
         {
+            _ee203 = ee203;
+
             InitializeComponent();
         }
 
@@ -37,55 +42,14 @@ namespace CurrentMonitor
 
             init_chart();
 
-            comboBox_serialPorts.DataSource = SerialPort.GetPortNames();
+            _ee203.Zero();
+            _ee203.CmdPort_Data_Event += _ee203_CmdPort_Data_Event;
 
-            openCmdPort();
+            _ee203.DataPort_Data_Event += _ee203_DataPort_Data_Event;
 
-            if (_port_cmd.IsOpen)
-            {
-                _port_data = new SerialPort("COM5");
-                _port_data.DataReceived += _port_DataReceived;
-                _port_data.BaudRate = 576600;
-                int trycount = 0;
-                while (true)
-                {
-                    try
-                    {
-                        _port_data.Open();
-                        break;
-                    }
-                    catch { }
-
-                    if (trycount++ > 10)
-                    {
-                        try
-                        {
-                            _port_data.Open();
-                            break;
-                        }
-                        catch
-                        {
-                            DialogResult res = MessageBox.Show("Please reset data device", "Open port error", MessageBoxButtons.RetryCancel);
-                            if (res == DialogResult.Cancel)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                _port_cmd.WriteLine("h");
-                _port_cmd.WriteLine("p");
-                _port_cmd.WriteLine("z");
-                _port_cmd.WriteLine("i 100");
-                _port_cmd.WriteLine("r");
-
-
-            }
 
             /*
             startUSBWatcher();
-
 
 
             var port_names = SerialPort.GetPortNames();
@@ -101,48 +65,15 @@ namespace CurrentMonitor
             */
         }
 
-
-        void openCmdPort()
+        private void _ee203_DataPort_Data_Event(object sender, string data)
         {
-            _port_cmd = new SerialPort("COM6");
-            _port_cmd.DataReceived += Port_CommandDataReceived;
-            _port_cmd.BaudRate = 576600;
-            _port_cmd.NewLine = "\r";
-            int trycount = 0;
-            while (true)
-            {
-                try
-                {
-                    _port_cmd.Open();
-                    break;
-                }
-                catch { }
-
-                if (trycount++ > 10)
-                {
-                    try
-                    {
-                        _port_cmd.Open();
-                        break;
-                    }
-                    catch
-                    {
-                        DialogResult res = MessageBox.Show("Please reset device", "Open port error", MessageBoxButtons.RetryCancel);
-                        if (res == DialogResult.Cancel)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-
-        }
-
-        private void _port_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            string data = _port_data.ReadExisting();
             update_chart(data);
             updateTextboxData(data);
+        }
+
+        private void _ee203_CmdPort_Data_Event(object sender, string data)
+        {
+            updateCommandData(data);
         }
 
         void updateTextboxData(string data)
@@ -152,7 +83,7 @@ namespace CurrentMonitor
                 updateTextboxDataCallback d = new updateTextboxDataCallback(updateTextboxData);
                 try
                 {
-                    if(!this.IsDisposed && !_isclosing)
+                    if (!this.IsDisposed && !_isclosing)
                         this.Invoke(d, new object[] { data });
                 }
                 catch { }
@@ -166,22 +97,6 @@ namespace CurrentMonitor
 
                 data = data.Replace("\r", "\r\n");
                 textBox_serialData.AppendText(data);
-            }
-        }
-
-        private void Port_CommandDataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            SerialPort port = (SerialPort)sender;
-
-            switch (e.EventType)
-            {
-                case SerialData.Chars:
-                    string data = _port_cmd.ReadExisting();
-                    updateCommandData(data);
-                    break;
-                case SerialData.Eof:
-                    // means receiving ended
-                    break;
             }
         }
 
@@ -212,36 +127,34 @@ namespace CurrentMonitor
                 {
                     this.Invoke(d, new object[] { data });
                 }
-                catch { }
-            }
-            else
-            {
-                try
-                {
-                    string[] lines = data.Split(new char[] { '\r' });
-                    foreach (string line in lines)
-                    {
-                        string[] cells = line.Split(new char[] { ',' });
-                        if (cells.Length == 7)
-                        {
-                            try
-                            {
-                                string[] ts1 = cells[0].Split(new char[] { ':' });
-                                string[] ts2 = ts1[1].Split(new char[] { '.' });
-                                TimeSpan timestamp = new TimeSpan(0, 0, Convert.ToInt32(ts1[0]), Convert.ToInt32(ts2[0]), Convert.ToInt32(ts2[1]));
-
-                                double current = Convert.ToDouble(cells[3]);
-                                chart1.Series["Current"].Points.AddXY(timestamp.ToString(@"m\:s", System.Globalization.CultureInfo.InvariantCulture), current);
-
-                            }
-                            catch { }
-                        }
-                    }
-
-                }
                 catch (Exception ex)
                 {
                     string msg = ex.Message;
+                }
+            }
+            else
+            {
+                string[] lines = data.Split(new char[] { '\r' });
+                foreach (string line in lines)
+                {
+                    string[] cells = line.Split(new char[] { ',' });
+                    if (cells.Length == 7)
+                    {
+                        try
+                        {
+                            string[] ts1 = cells[0].Split(new char[] { ':' });
+                            string[] ts2 = ts1[1].Split(new char[] { '.' });
+                            TimeSpan timestamp = new TimeSpan(0, 0, Convert.ToInt32(ts1[0]), Convert.ToInt32(ts2[0]), Convert.ToInt32(ts2[1]));
+
+                            double current = Convert.ToDouble(cells[3]);
+                            chart1.Series["Current"].Points.AddXY(timestamp.ToString(@"m\:s", System.Globalization.CultureInfo.InvariantCulture), current);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            string msg = ex.Message;
+                        }
+                    }
                 }
             }
         }
@@ -291,10 +204,6 @@ namespace CurrentMonitor
             }
         }
 
-        private void textBox_serialCommand_TextChanged(object sender, EventArgs e)
-        {
-        }
-
         private void textBox_serialCommand_KeyPress(object sender, KeyPressEventArgs e)
         {
             TextBox tb = (TextBox)sender;
@@ -317,7 +226,7 @@ namespace CurrentMonitor
                     if (index == 0) break;
                 }
 
-                _port_cmd.WriteLine(cmd);
+                _ee203.WriteLine(cmd);
             }
         }
 
@@ -325,20 +234,24 @@ namespace CurrentMonitor
         {
             _isclosing = true;
 
-            if (_port_cmd.IsOpen)
-                _port_cmd.Close();
+        }
 
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _ee203.Zero();
+            chart1.Series["Current"].Points.Clear();
+        }
 
-            if (_port_data.IsOpen)
-            {
-                try
-                {
-                    Task close_data_port_task = new Task(() => _port_data.Close());
-                    close_data_port_task.Start();
-                }
-                catch { }
+        private void chart1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            //chart1.ChartAreas[0].AxisY.ScaleView.ZoomReset();
+            //chart1.ChartAreas[0].AxisY.Maximum = Double.NaN;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoom(0, 0.000001);
+            //chart1.ChartAreas[0].AxisY.ScaleView.ZoomReset();
+        }
 
-            }
+        private void Form_Controller_FormClosed(object sender, FormClosedEventArgs e)
+        {
         }
 
         void init_chart()

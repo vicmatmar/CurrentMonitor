@@ -19,8 +19,12 @@ namespace CurrentMonitor
         SerialPort _cmd_port;
         SerialPort _data_port;
 
-        double _volatge_max;
-        double _volatge_min;
+        double _volatge_exp_max;
+        double _volatge_exp_min;
+        double _volatge_act_max = Double.NaN;
+        double _volatge_act_min = Double.NaN;
+        double _current_act_max = Double.NaN;
+        double _current_act_min = Double.NaN;
 
 
         delegate void setControlPropertyValueCallback(Control control, object value, string property_name);
@@ -32,24 +36,47 @@ namespace CurrentMonitor
 
             double value = Properties.Settings.Default.Voltage_Value;
             double tolarance = Properties.Settings.Default.Voltage_Tolarance;
-            _volatge_max = value + tolarance * value / 100;
-            _volatge_min = value - tolarance * value / 100;
+            _volatge_exp_max = value + tolarance * value / 100;
+            _volatge_exp_min = value - tolarance * value / 100;
+
+            _ee203 = new ee203(
+                cmd_port_name: Properties.Settings.Default.Cmd_Port_Name,
+                data_port_name: Properties.Settings.Default.Data_Port_Name);
+            //_ee203.CmdPort_Data_Event += _ee203_CmdPort_Data_Event;
+            _ee203.DataPort_Data_Event += _ee203_DataPort_Data_Event;
+
+
+        }
+
+        private void _ee203_DataPort_Data_Event(object sender, string data)
+        {
+            string[] lines = data.Split(new char[] { '\r' });
+            foreach (string line in lines)
+            {
+                string[] cells = line.Split(new char[] { ',' });
+                if (cells.Length == 7)
+                {
+                    try
+                    {
+                        processData(cells);
+                    }
+                    catch (Exception ex)
+                    {
+                        string msg = ex.Message;
+                    }
+                }
+            }
         }
 
         private void controllerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            closePorts();
-
-            Form_Controller ctrlform = new Form_Controller();
+            Form_Controller ctrlform = new Form_Controller(_ee203);
             ctrlform.ShowDialog();
-
-            openPorts();
         }
 
         void closePorts()
         {
-            _cmd_port.Close();
-            _data_port.Close();
+            _ee203.ClosePorts();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -60,17 +87,19 @@ namespace CurrentMonitor
 
         private void Form_Main_Load(object sender, EventArgs e)
         {
-            label_current.Text = "";
-            label_voltage.Text = "";
+            label_i_act.Text = "";
+            label_i_max.Text = "";
+            label_i_min.Text = "";
+
+            label_v_act.Text = "";
+            label_v_max.Text = "";
+            label_v_min.Text = "";
 
             openPorts();
         }
 
         void openPorts()
         {
-            _ee203 = new ee203();
-            _ee203.CMD_Port_Name = Properties.Settings.Default.Cmd_Port_Name;
-
             while (true)
             {
                 try
@@ -92,44 +121,36 @@ namespace CurrentMonitor
                     }
                 }
             }
+
             if (_cmd_port.IsOpen)
             {
                 _ee203.Pause();
                 _ee203.Zero();
 
-                _ee203.DATA_Port_Name = Properties.Settings.Default.Data_Port_Name;
-                _data_port = _ee203.OpenDataPort();
-                _data_port.DataReceived += _data_port_DataReceived;
-
-                _ee203.Interval(ee203.Sampling.Medium);
-                //_ee203.Interval(ee203.Sampling.Fast);
-                //_ee203.Interval(ee203.Sampling.Fastest);
-
-                _ee203.Resume();
-            }
-        }
-
-        private void _data_port_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-
-            string data = _data_port.ReadExisting();
-            string[] lines = data.Split(new char[] { '\r' });
-            foreach (string line in lines)
-            {
-                string[] cells = line.Split(new char[] { ',' });
-                if (cells.Length == 7)
+                while (true)
                 {
                     try
                     {
-                        processData(cells);
+                        _data_port = _ee203.OpenDataPort();
+                        break;
                     }
                     catch (Exception ex)
                     {
-                        string msg = ex.Message;
+                        DialogResult res = MessageBox.Show(
+                            string.Format("{0}", ex.Message),
+                            string.Format("{0}", "Error opening ee203 data port"),
+                            MessageBoxButtons.RetryCancel);
+                        if (res == DialogResult.Cancel)
+                        {
+                            break;
+                        }
                     }
                 }
+                _ee203.Interval(ee203.Sampling.Medium);
+                //_ee203.Interval(ee203.Sampling.Fast);
+                //_ee203.Interval(ee203.Sampling.Fastest);
+                _ee203.Resume();
             }
-
         }
 
         void processData(string[] data)
@@ -142,61 +163,50 @@ namespace CurrentMonitor
 
             // Voltage
             double voltage = Convert.ToDouble(data[2]);
-            Color forcolor = Color.Green;
-            if (voltage > _volatge_max || voltage < _volatge_min)
-                forcolor = Color.Red;
-            string text = string.Format("{0:F3} V", voltage);
+            if(Double.IsNaN(_volatge_act_max)) _volatge_act_max = voltage;
+            else if(voltage > _volatge_act_max)_volatge_act_max = voltage;
+            if (Double.IsNaN(_volatge_act_min)) _volatge_act_min = voltage;
+            else if (voltage < _volatge_act_min) _volatge_act_min = voltage;
 
-            SynchronizedInvoke(label_voltage, delegate () { label_voltage.ForeColor = forcolor; });
-            SynchronizedInvoke(label_voltage, delegate () { label_voltage.Text = text; });
+            Color forcolor = Color.Green;
+            if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
+                forcolor = Color.Red;
+
+            SynchronizedInvoke(label_v_act, delegate () { label_v_act.ForeColor = forcolor; });
+            SynchronizedInvoke(label_v_act, 
+                delegate () { label_v_act.Text = string.Format("{0:F3} V", voltage); });
+            SynchronizedInvoke(label_v_act,
+                delegate () { label_v_max.Text = string.Format("{0:F3} V", _volatge_act_max); });
+            SynchronizedInvoke(label_v_act,
+                delegate () { label_v_min.Text = string.Format("{0:F3} V", _volatge_act_min); });
 
             // Current
-            string current_str = data[3];
-            string[] current_parts = current_str.Split(new char[] { 'e' });
-            string si = "";
+            double current = Convert.ToDouble(data[3]);
 
+            if (Double.IsNaN(_current_act_max)) _current_act_max = current;
+            else if (current > _current_act_max) _current_act_max = current;
 
-            if (current_parts.Length > 1)
-            {
-                switch (current_parts[1])
-                {
-                    case "-03":
-                        si = "mA";
-                        break;
-                    case "-06":
-                        si = "uA";
-                        break;
-                    case "-09":
-                        si = "nA";
-                        break;
-                    case "-12":
-                        si = "p";
-                        break;
-                    case "-15":
-                        si = "f";
-                        break;
-                }
-            }
+            if (Double.IsNaN(_current_act_min)) _current_act_min = current;
+            else if (current < _current_act_min) _current_act_min = current;
 
-            if (si != "")
-            {
-                text = current_parts[0] + " " + si;
-
-            }
-            else
-            {
-                text = current_str;
-            }
-            SynchronizedInvoke(label_current, delegate () { label_current.Text = text; });
+            SynchronizedInvoke(label_i_act,
+                delegate () { label_i_act.Text = ToSIPrefixedString(current) + "A"; });
+            SynchronizedInvoke(label_i_max,
+                delegate () { label_i_max.Text = ToSIPrefixedString(_current_act_max) + "A"; });
+            SynchronizedInvoke(label_i_min,
+                delegate () { label_i_min.Text = ToSIPrefixedString(_current_act_min) + "A"; });
 
             // Checks
-            text = "Testing...";
+            string text = "Testing...";
             forcolor = Color.Black;
-            if (voltage <= 0.001)
+            if (voltage <= Properties.Settings.Default.Voltage_Off_Threshold)
             {
                 forcolor = Color.Red;
                 text = "No voltage detected.  Is power supply on and connected?";
             }
+
+
+
             SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.ForeColor = forcolor; });
             SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.Text = text; });
 
@@ -214,77 +224,15 @@ namespace CurrentMonitor
                 return;
             }
 
-            // Marshal to the required context.
-            sync.Invoke(action, new object[] { });
-        }
-
-        void updateMeasurements(string voltage_str, string current_str)
-        {
-            if (label_current.InvokeRequired || label_voltage.InvokeRequired || label_dev_status.InvokeRequired)
+            try
             {
-                updateMeasurementsCallback d = new updateMeasurementsCallback(updateMeasurements);
-                this.Invoke(d, new object[] { voltage_str, current_str });
+                // Marshal to the required context.
+                sync.Invoke(action, new object[] { });
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    double voltage = Convert.ToDouble(voltage_str);
-                    if (voltage > _volatge_max || voltage < _volatge_min)
-                        label_voltage.ForeColor = Color.Red;
-                    else
-                        label_voltage.ForeColor = Color.Green;
-
-                    label_voltage.Text = string.Format("{0:F3} V", voltage);
-
-                    //label_current.Text = string.Format("{0:G2}", current);
-                    string[] current_parts = current_str.Split(new char[] { 'e' });
-                    string si = "";
-                    if (current_parts.Length > 1)
-                    {
-                        switch (current_parts[1])
-                        {
-                            case "-03":
-                                si = "mA";
-                                break;
-                            case "-06":
-                                si = "uA";
-                                break;
-                            case "-09":
-                                si = "nA";
-                                break;
-                            case "-12":
-                                si = "p";
-                                break;
-                            case "-15":
-                                si = "f";
-                                break;
-                        }
-                    }
-
-                    if (si != "")
-                    {
-                        label_current.Text = current_parts[0] + " " + si; ;
-
-                    }
-                    else
-                    {
-                        label_current.Text = current_str;
-                    }
-
-                    if (voltage <= 0.001)
-                    {
-                        label_dev_status.ForeColor = Color.Red;
-                        label_dev_status.Text = "No voltage detected.  Is power supply on and connected?";
-                    }
-                }
-                catch (FormatException)
-                {
-
-                }
-
+                string msg = ex.Message;
             }
-
         }
 
         /// <summary>
@@ -292,77 +240,89 @@ namespace CurrentMonitor
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>si prefixed string</returns>
-        public string ToSIPrefixedString(double value)
+        public string ToSIPrefixedString(double d)
         {
-            string stringValue = value.ToString("#E+00");
-            string[] stringValueParts = stringValue.Split("E".ToCharArray());
-            int mantissa = Convert.ToInt32(stringValueParts[0]);
-            int exponent = Convert.ToInt32(stringValueParts[1]);
-            while (exponent % 3 != 0)
+            double exponent = Math.Log10(Math.Abs(d));
+            if (Math.Abs(d) >= 1)
             {
-                mantissa *= 10;
-                exponent -= 1;
+                switch ((int)Math.Floor(exponent))
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                        return d.ToString();
+                    case 3:
+                    case 4:
+                    case 5:
+                        return (d / 1e3).ToString() + " k";
+                    case 6:
+                    case 7:
+                    case 8:
+                        return (d / 1e6).ToString() + " M";
+                    case 9:
+                    case 10:
+                    case 11:
+                        return (d / 1e9).ToString() + " G";
+                    case 12:
+                    case 13:
+                    case 14:
+                        return (d / 1e12).ToString() + " T";
+                    case 15:
+                    case 16:
+                    case 17:
+                        return (d / 1e15).ToString() + " P";
+                    case 18:
+                    case 19:
+                    case 20:
+                        return (d / 1e18).ToString() + " E";
+                    case 21:
+                    case 22:
+                    case 23:
+                        return (d / 1e21).ToString() + " Z";
+                    default:
+                        return (d / 1e24).ToString() + " Y";
+                }
             }
-
-            string prefixedValue = mantissa.ToString();
-            switch (exponent)
+            else if (Math.Abs(d) > 0)
             {
-                case 24:
-                    prefixedValue += "Y";
-                    break;
-                case 21:
-                    prefixedValue += "Z";
-                    break;
-                case 18:
-                    prefixedValue += "E";
-                    break;
-                case 15:
-                    prefixedValue += "P";
-                    break;
-                case 12:
-                    prefixedValue += "T";
-                    break;
-                case 9:
-                    prefixedValue += "G";
-                    break;
-                case 6:
-                    prefixedValue += "M";
-                    break;
-                case 3:
-                    prefixedValue += "k";
-                    break;
-                case 0:
-                    break;
-                case -3:
-                    prefixedValue += "m";
-                    break;
-                case -6:
-                    prefixedValue += "u";
-                    break;
-                case -9:
-                    prefixedValue += "n";
-                    break;
-                case -12:
-                    prefixedValue += "p";
-                    break;
-                case -15:
-                    prefixedValue += "f";
-                    break;
-                case -18:
-                    prefixedValue += "a";
-                    break;
-                case -21:
-                    prefixedValue += "z";
-                    break;
-                case -24:
-                    prefixedValue += "y";
-                    break;
-                default:
-                    prefixedValue = "invalid";
-                    break;
+                switch ((int)Math.Floor(exponent))
+                {
+                    case -1:
+                    case -2:
+                    case -3:
+                        return string.Format("{0:00.00 m}", (d * 1e3));
+                    case -4:
+                    case -5:
+                    case -6:
+                        return string.Format("{0:00.00 μ}", (d * 1e6));
+                    case -7:
+                    case -8:
+                    case -9:
+                        return string.Format("{0:00.00 n}", (d * 1e9));
+                    case -10:
+                    case -11:
+                    case -12:
+                        return string.Format("{0:00.00 p}", (d * 1e12));
+                    case -13:
+                    case -14:
+                    case -15:
+                        return string.Format("{0:00.00 f}", (d * 1e15));
+                    case -16:
+                    case -17:
+                    case -18:
+                        return string.Format("{0:00.00 a}", (d * 1e15));
+                    case -19:
+                    case -20:
+                    case -21:
+                        return string.Format("{0:00.00 z}", (d * 1e15));
+                    default:
+                        return string.Format("{0:00.00 y}", (d * 1e15));
+                }
             }
-
-            return prefixedValue;
+            else
+            {
+                return "0";
+            }
         }
 
         void controlSetProperty(Control control, object value, string property_name = "Text")
@@ -384,12 +344,23 @@ namespace CurrentMonitor
 
         private void Form_Main_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Task close_data_port_task = new Task(() => closePorts());
             try
             {
-                Task close_data_port_task = new Task(() => closePorts());
-                close_data_port_task.Start();
+                //close_data_port_task.Start();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+        }
+
+        private void button_reset_max_min_Click(object sender, EventArgs e)
+        {
+            _volatge_act_max = Double.NaN;
+            _volatge_act_min = Double.NaN;
+            _current_act_max = Double.NaN;
+            _current_act_min = Double.NaN;
         }
     }
 }

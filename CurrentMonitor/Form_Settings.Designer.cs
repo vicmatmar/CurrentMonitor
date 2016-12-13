@@ -38,6 +38,8 @@
             this.textBox_voltage_value = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_off_threadhold = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox_cmdPortName
@@ -128,6 +130,24 @@
             this.label3.TabIndex = 9;
             this.label3.Text = "Tolarance:";
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(12, 131);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(74, 13);
+            this.label4.TabIndex = 11;
+            this.label4.Text = "Off Threshold:";
+            // 
+            // textBox_off_threadhold
+            // 
+            this.textBox_off_threadhold.Location = new System.Drawing.Point(92, 128);
+            this.textBox_off_threadhold.Name = "textBox_off_threadhold";
+            this.textBox_off_threadhold.Size = new System.Drawing.Size(34, 20);
+            this.textBox_off_threadhold.TabIndex = 10;
+            this.textBox_off_threadhold.Text = "0.001";
+            this.textBox_off_threadhold.TextChanged += new System.EventHandler(this.textBox_off_threadhold_TextChanged);
+            // 
             // Form_Settings
             // 
             this.AcceptButton = this.button_ok;
@@ -135,6 +155,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_cancel;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.textBox_off_threadhold);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label_voltage_value);
@@ -166,5 +188,7 @@
         private System.Windows.Forms.TextBox textBox_voltage_value;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBox_off_threadhold;
     }
 }
