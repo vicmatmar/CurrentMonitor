@@ -82,5 +82,17 @@ namespace CurrentMonitor.Properties {
                 this["Voltage_Off_Threshold"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1E-07")]
+        public double Current_NoDevice_Threshold {
+            get {
+                return ((double)(this["Current_NoDevice_Threshold"]));
+            }
+            set {
+                this["Current_NoDevice_Threshold"] = value;
+            }
+        }
     }
 }

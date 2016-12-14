@@ -74,6 +74,9 @@ namespace CurrentMonitor
 
         public SerialPort OpenCmdPort()
         {
+            if (_cmd_port != null && _cmd_port.IsOpen)
+                return _cmd_port;
+
             int trycount = 0;
             while (true)
             {
@@ -117,26 +120,27 @@ namespace CurrentMonitor
 
         public void WriteLine(string data)
         {
+            OpenCmdPort();
             _cmd_port.WriteLine(data);
         }
 
         public void Pause()
         {
-            _cmd_port.WriteLine("p");
+            WriteLine("p");
         }
         public void Resume()
         {
-            _cmd_port.WriteLine("r");
+            WriteLine("r");
         }
         public void Zero()
         {
-            _cmd_port.WriteLine("z");
+            WriteLine("z");
         }
 
         public void Interval(Sampling interval)
         {
             string cmd = string.Format("i {0}", (int)interval);
-            _cmd_port.WriteLine(cmd);
+            WriteLine(cmd);
         }
 
 

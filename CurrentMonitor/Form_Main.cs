@@ -132,6 +132,16 @@ namespace CurrentMonitor
                     try
                     {
                         _data_port = _ee203.OpenDataPort();
+
+                        if (_data_port.IsOpen)
+                        {
+                            _ee203.Interval(ee203.Sampling.Medium);
+                            //_ee203.Interval(ee203.Sampling.Fast);
+                            //_ee203.Interval(ee203.Sampling.Fastest);
+
+                            _ee203.Resume();
+                        }
+
                         break;
                     }
                     catch (Exception ex)
@@ -146,10 +156,6 @@ namespace CurrentMonitor
                         }
                     }
                 }
-                _ee203.Interval(ee203.Sampling.Medium);
-                //_ee203.Interval(ee203.Sampling.Fast);
-                //_ee203.Interval(ee203.Sampling.Fastest);
-                _ee203.Resume();
             }
         }
 
@@ -204,7 +210,11 @@ namespace CurrentMonitor
                 forcolor = Color.Red;
                 text = "No voltage detected.  Is power supply on and connected?";
             }
-
+            else if(current < Properties.Settings.Default.Current_NoDevice_Threshold)
+            {
+                forcolor = Color.Blue;
+                text = "No device detected";
+            }
 
 
             SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.ForeColor = forcolor; });
@@ -228,6 +238,7 @@ namespace CurrentMonitor
             {
                 // Marshal to the required context.
                 sync.Invoke(action, new object[] { });
+                //sync.BeginInvoke(action, new object[] { });
             }
             catch (Exception ex)
             {
@@ -250,37 +261,37 @@ namespace CurrentMonitor
                     case 0:
                     case 1:
                     case 2:
-                        return d.ToString();
+                        return string.Format("{0:00.00}", d);
                     case 3:
                     case 4:
                     case 5:
-                        return (d / 1e3).ToString() + " k";
+                        return string.Format("{0:00.00 k}", (d / 1e3));
                     case 6:
                     case 7:
                     case 8:
-                        return (d / 1e6).ToString() + " M";
+                        return string.Format("{0:00.00 M}", (d / 1e6));
                     case 9:
                     case 10:
                     case 11:
-                        return (d / 1e9).ToString() + " G";
+                        return string.Format("{0:00.00 G}", (d / 1e9));
                     case 12:
                     case 13:
                     case 14:
-                        return (d / 1e12).ToString() + " T";
+                        return string.Format("{0:00.00 T}", (d / 1e12));
                     case 15:
                     case 16:
                     case 17:
-                        return (d / 1e15).ToString() + " P";
+                        return string.Format("{0:00.00 P}", (d / 1e15));
                     case 18:
                     case 19:
                     case 20:
-                        return (d / 1e18).ToString() + " E";
+                        return string.Format("{0:00.00 E}", (d / 1e18));
                     case 21:
                     case 22:
                     case 23:
-                        return (d / 1e21).ToString() + " Z";
+                        return string.Format("{0:00.00 Z}", (d / 1e21));
                     default:
-                        return (d / 1e24).ToString() + " Y";
+                        return string.Format("{0:00.00 Y}", (d / 1e24));
                 }
             }
             else if (Math.Abs(d) > 0)

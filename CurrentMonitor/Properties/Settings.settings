@@ -17,5 +17,8 @@
     <Setting Name="Voltage_Off_Threshold" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0.001</Value>
     </Setting>
+    <Setting Name="Current_NoDevice_Threshold" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1E-07</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
