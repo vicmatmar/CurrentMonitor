@@ -101,6 +101,8 @@ namespace CurrentMonitor
             label_v_max.Text = "";
             label_v_min.Text = "";
 
+            label_results.Text = "";
+
             toolStripStatusLabel1.Text = "";
 
             openPorts();
@@ -189,16 +191,16 @@ namespace CurrentMonitor
             if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
                 forcolor = Color.Red;
             string text = string.Format("{0:F3} V", voltage);
-            SynchronizedInvoke(label_dev_status,
+            synchronizedInvoke(label_dev_status,
                 delegate ()
                 {
                     label_v_act.Text = text;
                     label_v_act.ForeColor = forcolor;
                 });
 
-            SynchronizedInvoke(label_v_act,
+            synchronizedInvoke(label_v_act,
                 delegate () { label_v_max.Text = string.Format("{0:F3} V", _volatge_act_max); });
-            SynchronizedInvoke(label_v_act,
+            synchronizedInvoke(label_v_act,
                 delegate () { label_v_min.Text = string.Format("{0:F3} V", _volatge_act_min); });
 
 
@@ -212,11 +214,11 @@ namespace CurrentMonitor
             if (Double.IsNaN(_current_act_min)) _current_act_min = current;
             else if (current < _current_act_min) _current_act_min = current;
 
-            SynchronizedInvoke(label_i_act,
+            synchronizedInvoke(label_i_act,
                 delegate () { label_i_act.Text = ToSIPrefixedString(current) + "A"; });
-            SynchronizedInvoke(label_i_max,
+            synchronizedInvoke(label_i_max,
                 delegate () { label_i_max.Text = ToSIPrefixedString(_current_act_max) + "A"; });
-            SynchronizedInvoke(label_i_min,
+            synchronizedInvoke(label_i_min,
                 delegate () { label_i_min.Text = ToSIPrefixedString(_current_act_min) + "A"; });
 
             // Checks
@@ -234,13 +236,16 @@ namespace CurrentMonitor
                 _sleep_start = TimeSpan.MaxValue;
 
                 if (_sleep_detected)
+                {
                     _device_removed = true;
+                    syncLabelSetTextAndColor(label_results, "");
+                }
 
                 forcolor = Color.Blue;
                 text = "Device not detected";
 
             }
-            else if (current < 80e-6)
+            else if (current < 100e-6)
             {
                 TimeSpan time = ee203.DateTimeParse(data[0]);
                 if (_sleep_start == TimeSpan.MaxValue)
@@ -251,12 +256,14 @@ namespace CurrentMonitor
                 TimeSpan etime = time - _sleep_start;
                 if (etime > new TimeSpan(0, 0, 1))
                 {
-                    if(!_sleep_detected)
+                    if (!_sleep_detected)
                         _device_removed = false;
                     _sleep_detected = true;
 
                     forcolor = Color.Green;
                     text = string.Format("Sleep current detected: {0:ss}", etime);
+
+                    syncLabelSetTextAndColor(label_results, "PASS", Color.Green);
                 }
             }
             else if (current > 10E-3)
@@ -279,16 +286,30 @@ namespace CurrentMonitor
                 text = string.Format("Current = {0}", current);
             }
 
-            SynchronizedInvoke(label_dev_status,
-                delegate ()
-                {
-                    label_dev_status.Text = text;
-                    label_dev_status.ForeColor = forcolor;
-                });
-
+            syncLabelSetTextAndColor(label_dev_status, text, forcolor);
         }
 
-        void SynchronizedInvoke(ISynchronizeInvoke sync, Action action)
+        void syncLabelSetTextAndColor(Label control, string text)
+        {
+            synchronizedInvoke(control,
+                delegate ()
+                {
+                    control.Text = text;
+                });
+        }
+
+        void syncLabelSetTextAndColor(Label control, string text, Color forcolor)
+        {
+            synchronizedInvoke(control,
+                delegate ()
+                {
+                    control.Text = text;
+                    control.ForeColor = forcolor;
+                });
+        }
+
+
+        void synchronizedInvoke(ISynchronizeInvoke sync, Action action)
         {
             // If the invoke is not required, then invoke here and get out.
             if (!sync.InvokeRequired)

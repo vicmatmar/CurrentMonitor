@@ -48,6 +48,7 @@
             this.label_dev_status = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.label_results = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -61,7 +62,7 @@
             this.settingsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(618, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(437, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -91,9 +92,9 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.tableLayoutPanel1);
-            this.groupBox1.Location = new System.Drawing.Point(34, 56);
+            this.groupBox1.Location = new System.Drawing.Point(12, 162);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(278, 184);
+            this.groupBox1.Size = new System.Drawing.Size(295, 145);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Measurements";
@@ -230,9 +231,10 @@
             // label_dev_status
             // 
             this.label_dev_status.AutoSize = true;
-            this.label_dev_status.Location = new System.Drawing.Point(318, 83);
+            this.label_dev_status.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_dev_status.Location = new System.Drawing.Point(12, 115);
             this.label_dev_status.Name = "label_dev_status";
-            this.label_dev_status.Size = new System.Drawing.Size(52, 13);
+            this.label_dev_status.Size = new System.Drawing.Size(62, 16);
             this.label_dev_status.TabIndex = 3;
             this.label_dev_status.Text = "Waiting...";
             // 
@@ -240,9 +242,9 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 404);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 391);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(618, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(437, 22);
             this.statusStrip1.TabIndex = 4;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -252,11 +254,22 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
+            // label_results
+            // 
+            this.label_results.AutoSize = true;
+            this.label_results.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_results.Location = new System.Drawing.Point(162, 50);
+            this.label_results.Name = "label_results";
+            this.label_results.Size = new System.Drawing.Size(112, 24);
+            this.label_results.TabIndex = 5;
+            this.label_results.Text = "labelPaaFail";
+            // 
             // Form_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(618, 426);
+            this.ClientSize = new System.Drawing.Size(437, 413);
+            this.Controls.Add(this.label_results);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.label_dev_status);
             this.Controls.Add(this.groupBox1);
@@ -300,5 +313,6 @@
         private System.Windows.Forms.Button button_reset_max_min;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.Label label_results;
     }
 }
