@@ -34,21 +34,24 @@
             this.label_v_act = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.button_reset_max_min = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label_i_act = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.label_dev_status = new System.Windows.Forms.Label();
             this.label_v_max = new System.Windows.Forms.Label();
             this.label_i_max = new System.Windows.Forms.Label();
             this.label_v_min = new System.Windows.Forms.Label();
             this.label_i_min = new System.Windows.Forms.Label();
-            this.button_reset_max_min = new System.Windows.Forms.Button();
+            this.label_dev_status = new System.Windows.Forms.Label();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -124,6 +127,16 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(266, 100);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
+            // button_reset_max_min
+            // 
+            this.button_reset_max_min.Location = new System.Drawing.Point(3, 3);
+            this.button_reset_max_min.Name = "button_reset_max_min";
+            this.button_reset_max_min.Size = new System.Drawing.Size(44, 21);
+            this.button_reset_max_min.TabIndex = 5;
+            this.button_reset_max_min.Text = "&Reset";
+            this.button_reset_max_min.UseVisualStyleBackColor = true;
+            this.button_reset_max_min.Click += new System.EventHandler(this.button_reset_max_min_Click);
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -178,15 +191,6 @@
             this.label5.TabIndex = 6;
             this.label5.Text = "Min";
             // 
-            // label_dev_status
-            // 
-            this.label_dev_status.AutoSize = true;
-            this.label_dev_status.Location = new System.Drawing.Point(318, 83);
-            this.label_dev_status.Name = "label_dev_status";
-            this.label_dev_status.Size = new System.Drawing.Size(52, 13);
-            this.label_dev_status.TabIndex = 3;
-            this.label_dev_status.Text = "Waiting...";
-            // 
             // label_v_max
             // 
             this.label_v_max.AutoSize = true;
@@ -223,21 +227,37 @@
             this.label_i_min.TabIndex = 10;
             this.label_i_min.Text = "IMin";
             // 
-            // button_reset_max_min
+            // label_dev_status
             // 
-            this.button_reset_max_min.Location = new System.Drawing.Point(3, 3);
-            this.button_reset_max_min.Name = "button_reset_max_min";
-            this.button_reset_max_min.Size = new System.Drawing.Size(44, 21);
-            this.button_reset_max_min.TabIndex = 5;
-            this.button_reset_max_min.Text = "&Reset";
-            this.button_reset_max_min.UseVisualStyleBackColor = true;
-            this.button_reset_max_min.Click += new System.EventHandler(this.button_reset_max_min_Click);
+            this.label_dev_status.AutoSize = true;
+            this.label_dev_status.Location = new System.Drawing.Point(318, 83);
+            this.label_dev_status.Name = "label_dev_status";
+            this.label_dev_status.Size = new System.Drawing.Size(52, 13);
+            this.label_dev_status.TabIndex = 3;
+            this.label_dev_status.Text = "Waiting...";
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 404);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(618, 22);
+            this.statusStrip1.TabIndex = 4;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
+            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
             // Form_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(618, 426);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.label_dev_status);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
@@ -251,6 +271,8 @@
             this.groupBox1.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -276,5 +298,7 @@
         private System.Windows.Forms.Label label_v_min;
         private System.Windows.Forms.Label label_i_min;
         private System.Windows.Forms.Button button_reset_max_min;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
     }
 }

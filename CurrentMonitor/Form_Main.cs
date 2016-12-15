@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
-
+using System.Diagnostics;
 using System.IO.Ports;
 
 namespace CurrentMonitor
@@ -26,6 +26,9 @@ namespace CurrentMonitor
         double _current_act_max = Double.NaN;
         double _current_act_min = Double.NaN;
 
+        bool _device_removed = true;
+        bool _sleep_detected = false;
+        TimeSpan _sleep_start = TimeSpan.MaxValue;
 
         delegate void setControlPropertyValueCallback(Control control, object value, string property_name);
         delegate void updateMeasurementsCallback(string voltage_str, string current_str);
@@ -42,9 +45,9 @@ namespace CurrentMonitor
             _ee203 = new ee203(
                 cmd_port_name: Properties.Settings.Default.Cmd_Port_Name,
                 data_port_name: Properties.Settings.Default.Data_Port_Name);
+
             //_ee203.CmdPort_Data_Event += _ee203_CmdPort_Data_Event;
             _ee203.DataPort_Data_Event += _ee203_DataPort_Data_Event;
-
 
         }
 
@@ -56,6 +59,8 @@ namespace CurrentMonitor
                 string[] cells = line.Split(new char[] { ',' });
                 if (cells.Length == 7)
                 {
+                    toolStripStatusLabel1.Text = "";
+
                     try
                     {
                         processData(cells);
@@ -63,6 +68,7 @@ namespace CurrentMonitor
                     catch (Exception ex)
                     {
                         string msg = ex.Message;
+                        toolStripStatusLabel1.Text = msg;
                     }
                 }
             }
@@ -95,6 +101,8 @@ namespace CurrentMonitor
             label_v_max.Text = "";
             label_v_min.Text = "";
 
+            toolStripStatusLabel1.Text = "";
+
             openPorts();
         }
 
@@ -124,25 +132,28 @@ namespace CurrentMonitor
 
             if (_cmd_port.IsOpen)
             {
-                _ee203.Pause();
-                _ee203.Zero();
-
                 while (true)
                 {
                     try
                     {
+                        _ee203.Pause();
+                        _ee203.Zero();
+
                         _data_port = _ee203.OpenDataPort();
 
                         if (_data_port.IsOpen)
                         {
+                            _data_port.ReadExisting();
+
                             _ee203.Interval(ee203.Sampling.Medium);
                             //_ee203.Interval(ee203.Sampling.Fast);
                             //_ee203.Interval(ee203.Sampling.Fastest);
 
                             _ee203.Resume();
+
+                            break;
                         }
 
-                        break;
                     }
                     catch (Exception ex)
                     {
@@ -169,22 +180,28 @@ namespace CurrentMonitor
 
             // Voltage
             double voltage = Convert.ToDouble(data[2]);
-            if(Double.IsNaN(_volatge_act_max)) _volatge_act_max = voltage;
-            else if(voltage > _volatge_act_max)_volatge_act_max = voltage;
+            if (Double.IsNaN(_volatge_act_max)) _volatge_act_max = voltage;
+            else if (voltage > _volatge_act_max) _volatge_act_max = voltage;
             if (Double.IsNaN(_volatge_act_min)) _volatge_act_min = voltage;
             else if (voltage < _volatge_act_min) _volatge_act_min = voltage;
 
             Color forcolor = Color.Green;
             if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
                 forcolor = Color.Red;
+            string text = string.Format("{0:F3} V", voltage);
+            SynchronizedInvoke(label_dev_status,
+                delegate ()
+                {
+                    label_v_act.Text = text;
+                    label_v_act.ForeColor = forcolor;
+                });
 
-            SynchronizedInvoke(label_v_act, delegate () { label_v_act.ForeColor = forcolor; });
-            SynchronizedInvoke(label_v_act, 
-                delegate () { label_v_act.Text = string.Format("{0:F3} V", voltage); });
             SynchronizedInvoke(label_v_act,
                 delegate () { label_v_max.Text = string.Format("{0:F3} V", _volatge_act_max); });
             SynchronizedInvoke(label_v_act,
                 delegate () { label_v_min.Text = string.Format("{0:F3} V", _volatge_act_min); });
+
+
 
             // Current
             double current = Convert.ToDouble(data[3]);
@@ -203,22 +220,71 @@ namespace CurrentMonitor
                 delegate () { label_i_min.Text = ToSIPrefixedString(_current_act_min) + "A"; });
 
             // Checks
-            string text = "Testing...";
             forcolor = Color.Black;
+            text = "Testing...";
             if (voltage <= Properties.Settings.Default.Voltage_Off_Threshold)
             {
+                _sleep_start = TimeSpan.MaxValue;
+
                 forcolor = Color.Red;
                 text = "No voltage detected.  Is power supply on and connected?";
             }
-            else if(current < Properties.Settings.Default.Current_NoDevice_Threshold)
+            else if (current < Properties.Settings.Default.Current_NoDevice_Threshold)
             {
+                _sleep_start = TimeSpan.MaxValue;
+
+                if (_sleep_detected)
+                    _device_removed = true;
+
                 forcolor = Color.Blue;
-                text = "No device detected";
+                text = "Device not detected";
+
+            }
+            else if (current < 80e-6)
+            {
+                TimeSpan time = ee203.DateTimeParse(data[0]);
+                if (_sleep_start == TimeSpan.MaxValue)
+                {
+                    _sleep_start = time;
+                }
+
+                TimeSpan etime = time - _sleep_start;
+                if (etime > new TimeSpan(0, 0, 1))
+                {
+                    if(!_sleep_detected)
+                        _device_removed = false;
+                    _sleep_detected = true;
+
+                    forcolor = Color.Green;
+                    text = string.Format("Sleep current detected: {0:ss}", etime);
+                }
+            }
+            else if (current > 10E-3)
+            {
+                _sleep_start = TimeSpan.MaxValue;
+                if (!_sleep_detected)
+                    _device_removed = false;
+
+                forcolor = Color.Red;
+                text = "High current detected";
+
+            }
+            else
+            {
+                _sleep_start = TimeSpan.MaxValue;
+                if (!_sleep_detected)
+                    _device_removed = false;
+
+                forcolor = Color.Black;
+                text = string.Format("Current = {0}", current);
             }
 
-
-            SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.ForeColor = forcolor; });
-            SynchronizedInvoke(label_dev_status, delegate () { label_dev_status.Text = text; });
+            SynchronizedInvoke(label_dev_status,
+                delegate ()
+                {
+                    label_dev_status.Text = text;
+                    label_dev_status.ForeColor = forcolor;
+                });
 
         }
 
@@ -373,6 +439,7 @@ namespace CurrentMonitor
             _current_act_max = Double.NaN;
             _current_act_min = Double.NaN;
         }
+
     }
 }
 

@@ -143,6 +143,13 @@ namespace CurrentMonitor
             WriteLine(cmd);
         }
 
+        public static TimeSpan DateTimeParse(string str)
+        {
+            string[] ts1 = str.Split(new char[] { ':' });
+            string[] ts2 = ts1[1].Split(new char[] { '.' });
+            TimeSpan timestamp = new TimeSpan(0, 0, Convert.ToInt32(ts1[0]), Convert.ToInt32(ts2[0]), Convert.ToInt32(ts2[1]));
 
+            return timestamp;
+        }
     }
 }
