@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.textBox_cmdPortName = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label_cmdPortName = new System.Windows.Forms.Label();
+            this.label_dataPortName = new System.Windows.Forms.Label();
             this.textBox_dataPortName = new System.Windows.Forms.TextBox();
             this.button_ok = new System.Windows.Forms.Button();
             this.button_cancel = new System.Windows.Forms.Button();
@@ -42,8 +42,8 @@
             this.textBox_off_threadhold = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.textBox_nodevice_threshold = new System.Windows.Forms.TextBox();
+            this.label_nodevice_threshold = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -58,23 +58,23 @@
             this.textBox_cmdPortName.TabIndex = 0;
             this.textBox_cmdPortName.Text = "COM6";
             // 
-            // label1
+            // label_cmdPortName
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 23);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(84, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Cmd Port Name:";
+            this.label_cmdPortName.AutoSize = true;
+            this.label_cmdPortName.Location = new System.Drawing.Point(6, 23);
+            this.label_cmdPortName.Name = "label_cmdPortName";
+            this.label_cmdPortName.Size = new System.Drawing.Size(84, 13);
+            this.label_cmdPortName.TabIndex = 1;
+            this.label_cmdPortName.Text = "Cmd Port Name:";
             // 
-            // label2
+            // label_dataPortName
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 53);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(86, 13);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Data Port Name:";
+            this.label_dataPortName.AutoSize = true;
+            this.label_dataPortName.Location = new System.Drawing.Point(6, 53);
+            this.label_dataPortName.Name = "label_dataPortName";
+            this.label_dataPortName.Size = new System.Drawing.Size(86, 13);
+            this.label_dataPortName.TabIndex = 3;
+            this.label_dataPortName.Text = "Data Port Name:";
             // 
             // textBox_dataPortName
             // 
@@ -174,7 +174,7 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.textBox_nodevice_threshold);
-            this.groupBox2.Controls.Add(this.label5);
+            this.groupBox2.Controls.Add(this.label_nodevice_threshold);
             this.groupBox2.Location = new System.Drawing.Point(11, 200);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(300, 93);
@@ -182,29 +182,29 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Current";
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 20);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(111, 13);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "No Device Threshold:";
-            // 
             // textBox_nodevice_threshold
             // 
             this.textBox_nodevice_threshold.Location = new System.Drawing.Point(126, 19);
             this.textBox_nodevice_threshold.Name = "textBox_nodevice_threshold";
             this.textBox_nodevice_threshold.Size = new System.Drawing.Size(61, 20);
             this.textBox_nodevice_threshold.TabIndex = 12;
-            this.textBox_nodevice_threshold.Text = "100E-9";
+            this.textBox_nodevice_threshold.Text = "200E-9";
             this.textBox_nodevice_threshold.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
+            // 
+            // label_nodevice_threshold
+            // 
+            this.label_nodevice_threshold.AutoSize = true;
+            this.label_nodevice_threshold.Location = new System.Drawing.Point(9, 20);
+            this.label_nodevice_threshold.Name = "label_nodevice_threshold";
+            this.label_nodevice_threshold.Size = new System.Drawing.Size(111, 13);
+            this.label_nodevice_threshold.TabIndex = 0;
+            this.label_nodevice_threshold.Text = "No Device Threshold:";
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.label2);
+            this.groupBox3.Controls.Add(this.label_dataPortName);
             this.groupBox3.Controls.Add(this.textBox_cmdPortName);
-            this.groupBox3.Controls.Add(this.label1);
+            this.groupBox3.Controls.Add(this.label_cmdPortName);
             this.groupBox3.Controls.Add(this.textBox_dataPortName);
             this.groupBox3.Location = new System.Drawing.Point(11, 13);
             this.groupBox3.Name = "groupBox3";
@@ -242,8 +242,8 @@
         #endregion
 
         private System.Windows.Forms.TextBox textBox_cmdPortName;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_cmdPortName;
+        private System.Windows.Forms.Label label_dataPortName;
         private System.Windows.Forms.TextBox textBox_dataPortName;
         private System.Windows.Forms.Button button_ok;
         private System.Windows.Forms.Button button_cancel;
@@ -256,7 +256,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.TextBox textBox_nodevice_threshold;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label_nodevice_threshold;
         private System.Windows.Forms.GroupBox groupBox3;
     }
 }

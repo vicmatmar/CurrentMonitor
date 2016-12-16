@@ -26,9 +26,12 @@ namespace CurrentMonitor
         double _current_act_max = Double.NaN;
         double _current_act_min = Double.NaN;
 
-        bool _device_removed = true;
+        //        bool _device_removed = true;
         bool _sleep_detected = false;
         TimeSpan _sleep_start = TimeSpan.MaxValue;
+
+        enum States { No_Power, No_Device, Sleep, On, Other };
+        States _last_state = States.Other;
 
         delegate void setControlPropertyValueCallback(Control control, object value, string property_name);
         delegate void updateMeasurementsCallback(string voltage_str, string current_str);
@@ -146,8 +149,10 @@ namespace CurrentMonitor
                         if (_data_port.IsOpen)
                         {
                             _data_port.ReadExisting();
+                            Thread.Sleep(200);
 
                             _ee203.Interval(ee203.Sampling.Medium);
+                            Thread.Sleep(200);
                             //_ee203.Interval(ee203.Sampling.Fast);
                             //_ee203.Interval(ee203.Sampling.Fastest);
 
@@ -174,14 +179,14 @@ namespace CurrentMonitor
 
         void processData(string[] data)
         {
-            //string[] ts1 = cells[0].Split(new char[] { ':' });
-            //string[] ts2 = ts1[1].Split(new char[] { '.' });
-            //TimeSpan timestamp = new TimeSpan(0, 0, Convert.ToInt32(ts1[0]), Convert.ToInt32(ts2[0]), Convert.ToInt32(ts2[1]));
-
-            //updateMeasurements(voltage_str: cells[2], current_str: cells[3]);
+            // Timestamp
+            string timestamp_str = data[0];
+            syncLabelSetText(label_timestamp, timestamp_str);
 
             // Voltage
-            double voltage = Convert.ToDouble(data[2]);
+            double voltage = 0;
+            voltage = Convert.ToDouble(data[2]);
+
             if (Double.IsNaN(_volatge_act_max)) _volatge_act_max = voltage;
             else if (voltage > _volatge_act_max) _volatge_act_max = voltage;
             if (Double.IsNaN(_volatge_act_min)) _volatge_act_min = voltage;
@@ -191,18 +196,10 @@ namespace CurrentMonitor
             if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
                 forcolor = Color.Red;
             string text = string.Format("{0:F3} V", voltage);
-            synchronizedInvoke(label_dev_status,
-                delegate ()
-                {
-                    label_v_act.Text = text;
-                    label_v_act.ForeColor = forcolor;
-                });
 
-            synchronizedInvoke(label_v_act,
-                delegate () { label_v_max.Text = string.Format("{0:F3} V", _volatge_act_max); });
-            synchronizedInvoke(label_v_act,
-                delegate () { label_v_min.Text = string.Format("{0:F3} V", _volatge_act_min); });
-
+            syncLabelSetTextAndColor(label_v_act, text, forcolor);
+            syncLabelSetText(label_v_max, string.Format("{0:F3} V", _volatge_act_max));
+            syncLabelSetText(label_v_min, string.Format("{0:F3} V", _volatge_act_min));
 
 
             // Current
@@ -214,38 +211,30 @@ namespace CurrentMonitor
             if (Double.IsNaN(_current_act_min)) _current_act_min = current;
             else if (current < _current_act_min) _current_act_min = current;
 
-            synchronizedInvoke(label_i_act,
-                delegate () { label_i_act.Text = ToSIPrefixedString(current) + "A"; });
-            synchronizedInvoke(label_i_max,
-                delegate () { label_i_max.Text = ToSIPrefixedString(_current_act_max) + "A"; });
-            synchronizedInvoke(label_i_min,
-                delegate () { label_i_min.Text = ToSIPrefixedString(_current_act_min) + "A"; });
+            syncLabelSetText(label_i_act, ToSIPrefixedString(current) + "A");
+            syncLabelSetText(label_i_max, ToSIPrefixedString(_current_act_max) + "A");
+            syncLabelSetText(label_i_min, ToSIPrefixedString(_current_act_min) + "A");
 
             // Checks
+            States state = getState(voltage: voltage, current: current);
             forcolor = Color.Black;
             text = "Testing...";
-            if (voltage <= Properties.Settings.Default.Voltage_Off_Threshold)
+            if (state == States.No_Power)
             {
-                _sleep_start = TimeSpan.MaxValue;
-
                 forcolor = Color.Red;
                 text = "No voltage detected.  Is power supply on and connected?";
             }
-            else if (current < Properties.Settings.Default.Current_NoDevice_Threshold)
+            else if (state == States.No_Device)
             {
-                _sleep_start = TimeSpan.MaxValue;
-
                 if (_sleep_detected)
                 {
-                    _device_removed = true;
-                    syncLabelSetTextAndColor(label_results, "");
+                    syncLabelSetText(label_results, "");
                 }
 
                 forcolor = Color.Blue;
                 text = "Device not detected";
-
             }
-            else if (current < 100e-6)
+            else if (state == States.Sleep)
             {
                 TimeSpan time = ee203.DateTimeParse(data[0]);
                 if (_sleep_start == TimeSpan.MaxValue)
@@ -256,40 +245,60 @@ namespace CurrentMonitor
                 TimeSpan etime = time - _sleep_start;
                 if (etime > new TimeSpan(0, 0, 1))
                 {
-                    if (!_sleep_detected)
-                        _device_removed = false;
                     _sleep_detected = true;
 
                     forcolor = Color.Green;
-                    text = string.Format("Sleep current detected: {0:ss}", etime);
+                    text = string.Format("Sleep current detected: {0:hh\\:mm\\:ss}", etime);
 
                     syncLabelSetTextAndColor(label_results, "PASS", Color.Green);
                 }
+
+            }
+            else if (state == States.On)
+            {
+                forcolor = Color.Red;
+                text = "High current detected";
+            }
+            syncLabelSetTextAndColor(label_dev_status, text, forcolor);
+
+            if (state != States.Sleep)
+            {
+                _sleep_start = TimeSpan.MaxValue;
+            }
+
+            if (_last_state == States.No_Device && state != States.Sleep && state != States.No_Device)
+            {
+                _ee203.Zero();
+            }
+            _last_state = state;
+        }
+
+        States getState(double voltage, double current)
+        {
+            States state = States.Other;
+            if (voltage <= Properties.Settings.Default.Voltage_Off_Threshold)
+            {
+                state = States.No_Power;
+            }
+            else if (current < Properties.Settings.Default.Current_NoDevice_Threshold)
+            {
+                state = States.No_Device;
+
+            }
+            else if (current < 100e-6)
+            {
+                state = States.Sleep;
             }
             else if (current > 10E-3)
             {
-                _sleep_start = TimeSpan.MaxValue;
-                if (!_sleep_detected)
-                    _device_removed = false;
-
-                forcolor = Color.Red;
-                text = "High current detected";
+                state = States.On;
 
             }
-            else
-            {
-                _sleep_start = TimeSpan.MaxValue;
-                if (!_sleep_detected)
-                    _device_removed = false;
 
-                forcolor = Color.Black;
-                text = string.Format("Current = {0}", current);
-            }
-
-            syncLabelSetTextAndColor(label_dev_status, text, forcolor);
+            return state;
         }
 
-        void syncLabelSetTextAndColor(Label control, string text)
+        void syncLabelSetText(Label control, string text)
         {
             synchronizedInvoke(control,
                 delegate ()

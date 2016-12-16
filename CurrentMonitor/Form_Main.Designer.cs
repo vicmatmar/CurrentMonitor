@@ -49,6 +49,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.label_results = new System.Windows.Forms.Label();
+            this.label_timestamp = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -91,6 +92,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label_timestamp);
             this.groupBox1.Controls.Add(this.tableLayoutPanel1);
             this.groupBox1.Location = new System.Drawing.Point(12, 162);
             this.groupBox1.Name = "groupBox1";
@@ -264,6 +266,15 @@
             this.label_results.TabIndex = 5;
             this.label_results.Text = "labelPaaFail";
             // 
+            // label_timestamp
+            // 
+            this.label_timestamp.AutoSize = true;
+            this.label_timestamp.Location = new System.Drawing.Point(9, 126);
+            this.label_timestamp.Name = "label_timestamp";
+            this.label_timestamp.Size = new System.Drawing.Size(61, 13);
+            this.label_timestamp.TabIndex = 5;
+            this.label_timestamp.Text = "000:000.00";
+            // 
             // Form_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -282,6 +293,7 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -314,5 +326,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.Label label_results;
+        private System.Windows.Forms.Label label_timestamp;
     }
 }
