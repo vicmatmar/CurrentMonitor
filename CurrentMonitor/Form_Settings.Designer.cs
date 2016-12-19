@@ -36,15 +36,19 @@
             this.button_cancel = new System.Windows.Forms.Button();
             this.label_voltage_value = new System.Windows.Forms.Label();
             this.textBox_voltage_value = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox_voltage_tolarance = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBox_off_threadhold = new System.Windows.Forms.TextBox();
+            this.label_off_thresdhold = new System.Windows.Forms.Label();
+            this.textBox_off_thresdhold = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBox_sleep_threshold = new System.Windows.Forms.TextBox();
+            this.label_sleep_threshold = new System.Windows.Forms.Label();
             this.textBox_nodevice_threshold = new System.Windows.Forms.TextBox();
             this.label_nodevice_threshold = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label_current_high = new System.Windows.Forms.Label();
+            this.textBox_current_high = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -57,6 +61,7 @@
             this.textBox_cmdPortName.Size = new System.Drawing.Size(100, 20);
             this.textBox_cmdPortName.TabIndex = 0;
             this.textBox_cmdPortName.Text = "COM6";
+            this.textBox_cmdPortName.TextChanged += new System.EventHandler(this.textBox_cmdPortName_TextChanged);
             // 
             // label_cmdPortName
             // 
@@ -83,6 +88,7 @@
             this.textBox_dataPortName.Size = new System.Drawing.Size(100, 20);
             this.textBox_dataPortName.TabIndex = 2;
             this.textBox_dataPortName.Text = "COM5";
+            this.textBox_dataPortName.TextChanged += new System.EventHandler(this.textBox_dataPortName_TextChanged);
             // 
             // button_ok
             // 
@@ -120,14 +126,15 @@
             this.textBox_voltage_value.Size = new System.Drawing.Size(34, 20);
             this.textBox_voltage_value.TabIndex = 6;
             this.textBox_voltage_value.Text = "3.0";
+            this.textBox_voltage_value.TextChanged += new System.EventHandler(this.textBox_voltage_value_TextChanged);
             // 
-            // textBox1
+            // textBox_voltage_tolarance
             // 
-            this.textBox1.Location = new System.Drawing.Point(173, 23);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(34, 20);
-            this.textBox1.TabIndex = 8;
-            this.textBox1.Text = "10";
+            this.textBox_voltage_tolarance.Location = new System.Drawing.Point(173, 23);
+            this.textBox_voltage_tolarance.Name = "textBox_voltage_tolarance";
+            this.textBox_voltage_tolarance.Size = new System.Drawing.Size(34, 20);
+            this.textBox_voltage_tolarance.TabIndex = 8;
+            this.textBox_voltage_tolarance.Text = "10";
             // 
             // label3
             // 
@@ -138,31 +145,31 @@
             this.label3.TabIndex = 9;
             this.label3.Text = "Tolarance:";
             // 
-            // label4
+            // label_off_thresdhold
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 57);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(74, 13);
-            this.label4.TabIndex = 11;
-            this.label4.Text = "Off Threshold:";
+            this.label_off_thresdhold.AutoSize = true;
+            this.label_off_thresdhold.Location = new System.Drawing.Point(6, 57);
+            this.label_off_thresdhold.Name = "label_off_thresdhold";
+            this.label_off_thresdhold.Size = new System.Drawing.Size(74, 13);
+            this.label_off_thresdhold.TabIndex = 11;
+            this.label_off_thresdhold.Text = "Off Threshold:";
             // 
-            // textBox_off_threadhold
+            // textBox_off_thresdhold
             // 
-            this.textBox_off_threadhold.Location = new System.Drawing.Point(86, 50);
-            this.textBox_off_threadhold.Name = "textBox_off_threadhold";
-            this.textBox_off_threadhold.Size = new System.Drawing.Size(34, 20);
-            this.textBox_off_threadhold.TabIndex = 10;
-            this.textBox_off_threadhold.Text = "0.001";
-            this.textBox_off_threadhold.TextChanged += new System.EventHandler(this.textBox_off_threadhold_TextChanged);
+            this.textBox_off_thresdhold.Location = new System.Drawing.Point(86, 54);
+            this.textBox_off_thresdhold.Name = "textBox_off_thresdhold";
+            this.textBox_off_thresdhold.Size = new System.Drawing.Size(61, 20);
+            this.textBox_off_thresdhold.TabIndex = 10;
+            this.textBox_off_thresdhold.Text = "0.001";
+            this.textBox_off_thresdhold.TextChanged += new System.EventHandler(this.textBox_off_threadhold_TextChanged);
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label_voltage_value);
-            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.label_off_thresdhold);
             this.groupBox1.Controls.Add(this.textBox_voltage_value);
-            this.groupBox1.Controls.Add(this.textBox_off_threadhold);
-            this.groupBox1.Controls.Add(this.textBox1);
+            this.groupBox1.Controls.Add(this.textBox_off_thresdhold);
+            this.groupBox1.Controls.Add(this.textBox_voltage_tolarance);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Location = new System.Drawing.Point(11, 104);
             this.groupBox1.Name = "groupBox1";
@@ -173,28 +180,50 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.textBox_current_high);
+            this.groupBox2.Controls.Add(this.label_current_high);
+            this.groupBox2.Controls.Add(this.textBox_sleep_threshold);
+            this.groupBox2.Controls.Add(this.label_sleep_threshold);
             this.groupBox2.Controls.Add(this.textBox_nodevice_threshold);
             this.groupBox2.Controls.Add(this.label_nodevice_threshold);
             this.groupBox2.Location = new System.Drawing.Point(11, 200);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(300, 93);
+            this.groupBox2.Size = new System.Drawing.Size(300, 109);
             this.groupBox2.TabIndex = 13;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Current";
             // 
+            // textBox_sleep_threshold
+            // 
+            this.textBox_sleep_threshold.Location = new System.Drawing.Point(146, 45);
+            this.textBox_sleep_threshold.Name = "textBox_sleep_threshold";
+            this.textBox_sleep_threshold.Size = new System.Drawing.Size(61, 20);
+            this.textBox_sleep_threshold.TabIndex = 14;
+            this.textBox_sleep_threshold.Text = "200E-6";
+            this.textBox_sleep_threshold.TextChanged += new System.EventHandler(this.textBox_sleep_threshold_TextChanged);
+            // 
+            // label_sleep_threshold
+            // 
+            this.label_sleep_threshold.AutoSize = true;
+            this.label_sleep_threshold.Location = new System.Drawing.Point(6, 49);
+            this.label_sleep_threshold.Name = "label_sleep_threshold";
+            this.label_sleep_threshold.Size = new System.Drawing.Size(124, 13);
+            this.label_sleep_threshold.TabIndex = 13;
+            this.label_sleep_threshold.Text = "Device Sleep Threshold:";
+            // 
             // textBox_nodevice_threshold
             // 
-            this.textBox_nodevice_threshold.Location = new System.Drawing.Point(126, 19);
+            this.textBox_nodevice_threshold.Location = new System.Drawing.Point(146, 17);
             this.textBox_nodevice_threshold.Name = "textBox_nodevice_threshold";
             this.textBox_nodevice_threshold.Size = new System.Drawing.Size(61, 20);
             this.textBox_nodevice_threshold.TabIndex = 12;
             this.textBox_nodevice_threshold.Text = "200E-9";
-            this.textBox_nodevice_threshold.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
+            this.textBox_nodevice_threshold.TextChanged += new System.EventHandler(this.textBox_noDevice_TextChanged);
             // 
             // label_nodevice_threshold
             // 
             this.label_nodevice_threshold.AutoSize = true;
-            this.label_nodevice_threshold.Location = new System.Drawing.Point(9, 20);
+            this.label_nodevice_threshold.Location = new System.Drawing.Point(6, 20);
             this.label_nodevice_threshold.Name = "label_nodevice_threshold";
             this.label_nodevice_threshold.Size = new System.Drawing.Size(111, 13);
             this.label_nodevice_threshold.TabIndex = 0;
@@ -212,6 +241,24 @@
             this.groupBox3.TabIndex = 14;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Serial Ports";
+            // 
+            // label_current_high
+            // 
+            this.label_current_high.AutoSize = true;
+            this.label_current_high.Location = new System.Drawing.Point(9, 78);
+            this.label_current_high.Name = "label_current_high";
+            this.label_current_high.Size = new System.Drawing.Size(119, 13);
+            this.label_current_high.TabIndex = 15;
+            this.label_current_high.Text = "High Current Threshold:";
+            // 
+            // textBox_current_high
+            // 
+            this.textBox_current_high.Location = new System.Drawing.Point(146, 75);
+            this.textBox_current_high.Name = "textBox_current_high";
+            this.textBox_current_high.Size = new System.Drawing.Size(61, 20);
+            this.textBox_current_high.TabIndex = 16;
+            this.textBox_current_high.Text = "10E-3";
+            this.textBox_current_high.TextChanged += new System.EventHandler(this.textBox_current_high_TextChanged);
             // 
             // Form_Settings
             // 
@@ -249,14 +296,18 @@
         private System.Windows.Forms.Button button_cancel;
         private System.Windows.Forms.Label label_voltage_value;
         private System.Windows.Forms.TextBox textBox_voltage_value;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBox_voltage_tolarance;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBox_off_threadhold;
+        private System.Windows.Forms.Label label_off_thresdhold;
+        private System.Windows.Forms.TextBox textBox_off_thresdhold;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.TextBox textBox_nodevice_threshold;
         private System.Windows.Forms.Label label_nodevice_threshold;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.TextBox textBox_sleep_threshold;
+        private System.Windows.Forms.Label label_sleep_threshold;
+        private System.Windows.Forms.TextBox textBox_current_high;
+        private System.Windows.Forms.Label label_current_high;
     }
 }

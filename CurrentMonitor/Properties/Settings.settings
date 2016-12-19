@@ -12,13 +12,19 @@
       <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="Voltage_Tolarance" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="Voltage_Off_Threshold" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0.001</Value>
+      <Value Profile="(Default)">0.002</Value>
     </Setting>
     <Setting Name="Current_NoDevice_Threshold" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">1E-07</Value>
+      <Value Profile="(Default)">2E-07</Value>
+    </Setting>
+    <Setting Name="Current_Sleep_Threshold" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.0002</Value>
+    </Setting>
+    <Setting Name="Current_High_Threshold" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.01</Value>
     </Setting>
   </Settings>
 </SettingsFile>

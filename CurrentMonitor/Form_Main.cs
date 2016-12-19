@@ -30,7 +30,7 @@ namespace CurrentMonitor
         bool _sleep_detected = false;
         TimeSpan _sleep_start = TimeSpan.MaxValue;
 
-        enum States { No_Power, No_Device, Sleep, On, Other };
+        enum States { No_Power, Bad_Power, No_Device, Sleep, On, Other };
         States _last_state = States.Other;
 
         delegate void setControlPropertyValueCallback(Control control, object value, string property_name);
@@ -89,6 +89,8 @@ namespace CurrentMonitor
         {
             Form_Settings dlg = new Form_Settings();
             DialogResult res = dlg.ShowDialog();
+            if (res == DialogResult.OK)
+                Properties.Settings.Default.Reload();
         }
 
         private void Form_Main_Load(object sender, EventArgs e)
@@ -188,6 +190,11 @@ namespace CurrentMonitor
                 forcolor = Color.Red;
                 text = "No voltage detected.  Is power supply on and connected?";
             }
+            else if(state == States.Bad_Power)
+            {
+                forcolor = Color.Red;
+                text = "Volatge out of range.  Please adjust power supply";
+            }
             else if (state == States.No_Device)
             {
                 if (_sleep_detected)
@@ -267,32 +274,35 @@ namespace CurrentMonitor
             if (Double.IsNaN(_current_act_min)) _current_act_min = current;
             else if (current < _current_act_min) _current_act_min = current;
 
-            syncLabelSetText(label_i_act, ToSIPrefixedString(current) + "A");
-            syncLabelSetText(label_i_max, ToSIPrefixedString(_current_act_max) + "A");
-            syncLabelSetText(label_i_min, ToSIPrefixedString(_current_act_min) + "A");
+            syncLabelSetText(label_i_act, Utils.ToSIPrefixedString(current) + "A");
+            syncLabelSetText(label_i_max, Utils.ToSIPrefixedString(_current_act_max) + "A");
+            syncLabelSetText(label_i_min, Utils.ToSIPrefixedString(_current_act_min) + "A");
 
         }
 
         States getState(double voltage, double current)
         {
+            double nodi = Properties.Settings.Default.Current_NoDevice_Threshold;
             States state = States.Other;
             if (voltage <= Properties.Settings.Default.Voltage_Off_Threshold)
             {
                 state = States.No_Power;
             }
+            else if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
+            {
+                state = States.Bad_Power;
+            }
             else if (current < Properties.Settings.Default.Current_NoDevice_Threshold)
             {
                 state = States.No_Device;
-
             }
-            else if (current < 100e-6)
+            else if (current < Properties.Settings.Default.Current_Sleep_Threshold)
             {
                 state = States.Sleep;
             }
-            else if (current > 10E-3)
+            else if (current > Properties.Settings.Default.Current_High_Threshold)
             {
                 state = States.On;
-
             }
 
             return state;
@@ -339,96 +349,6 @@ namespace CurrentMonitor
             catch (Exception ex)
             {
                 string msg = ex.Message;
-            }
-        }
-
-        /// <summary>
-        /// converts the value into a string with SI prefix
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>si prefixed string</returns>
-        public string ToSIPrefixedString(double d)
-        {
-            double exponent = Math.Log10(Math.Abs(d));
-            if (Math.Abs(d) >= 1)
-            {
-                switch ((int)Math.Floor(exponent))
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                        return string.Format("{0:00.00}", d);
-                    case 3:
-                    case 4:
-                    case 5:
-                        return string.Format("{0:00.00 k}", (d / 1e3));
-                    case 6:
-                    case 7:
-                    case 8:
-                        return string.Format("{0:00.00 M}", (d / 1e6));
-                    case 9:
-                    case 10:
-                    case 11:
-                        return string.Format("{0:00.00 G}", (d / 1e9));
-                    case 12:
-                    case 13:
-                    case 14:
-                        return string.Format("{0:00.00 T}", (d / 1e12));
-                    case 15:
-                    case 16:
-                    case 17:
-                        return string.Format("{0:00.00 P}", (d / 1e15));
-                    case 18:
-                    case 19:
-                    case 20:
-                        return string.Format("{0:00.00 E}", (d / 1e18));
-                    case 21:
-                    case 22:
-                    case 23:
-                        return string.Format("{0:00.00 Z}", (d / 1e21));
-                    default:
-                        return string.Format("{0:00.00 Y}", (d / 1e24));
-                }
-            }
-            else if (Math.Abs(d) > 0)
-            {
-                switch ((int)Math.Floor(exponent))
-                {
-                    case -1:
-                    case -2:
-                    case -3:
-                        return string.Format("{0:00.00 m}", (d * 1e3));
-                    case -4:
-                    case -5:
-                    case -6:
-                        return string.Format("{0:00.00 μ}", (d * 1e6));
-                    case -7:
-                    case -8:
-                    case -9:
-                        return string.Format("{0:00.00 n}", (d * 1e9));
-                    case -10:
-                    case -11:
-                    case -12:
-                        return string.Format("{0:00.00 p}", (d * 1e12));
-                    case -13:
-                    case -14:
-                    case -15:
-                        return string.Format("{0:00.00 f}", (d * 1e15));
-                    case -16:
-                    case -17:
-                    case -18:
-                        return string.Format("{0:00.00 a}", (d * 1e15));
-                    case -19:
-                    case -20:
-                    case -21:
-                        return string.Format("{0:00.00 z}", (d * 1e15));
-                    default:
-                        return string.Format("{0:00.00 y}", (d * 1e15));
-                }
-            }
-            else
-            {
-                return "0";
             }
         }
 

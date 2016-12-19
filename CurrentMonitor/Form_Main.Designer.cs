@@ -279,6 +279,7 @@
             // 
             // panel1
             // 
+            this.panel1.AutoSize = true;
             this.panel1.Controls.Add(this.label_results);
             this.panel1.Controls.Add(this.label_dev_status);
             this.panel1.Location = new System.Drawing.Point(12, 27);

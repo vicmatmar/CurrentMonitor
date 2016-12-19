@@ -61,7 +61,7 @@ namespace CurrentMonitor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
         public double Voltage_Tolarance {
             get {
                 return ((double)(this["Voltage_Tolarance"]));
@@ -73,7 +73,7 @@ namespace CurrentMonitor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.001")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.002")]
         public double Voltage_Off_Threshold {
             get {
                 return ((double)(this["Voltage_Off_Threshold"]));
@@ -85,13 +85,37 @@ namespace CurrentMonitor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1E-07")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2E-07")]
         public double Current_NoDevice_Threshold {
             get {
                 return ((double)(this["Current_NoDevice_Threshold"]));
             }
             set {
                 this["Current_NoDevice_Threshold"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0002")]
+        public double Current_Sleep_Threshold {
+            get {
+                return ((double)(this["Current_Sleep_Threshold"]));
+            }
+            set {
+                this["Current_Sleep_Threshold"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
+        public double Current_High_Threshold {
+            get {
+                return ((double)(this["Current_High_Threshold"]));
+            }
+            set {
+                this["Current_High_Threshold"] = value;
             }
         }
     }
