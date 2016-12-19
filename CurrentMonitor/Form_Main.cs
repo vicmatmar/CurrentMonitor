@@ -62,8 +62,6 @@ namespace CurrentMonitor
                 string[] cells = line.Split(new char[] { ',' });
                 if (cells.Length == 7)
                 {
-                    toolStripStatusLabel1.Text = "";
-
                     try
                     {
                         processData(cells);
@@ -71,7 +69,6 @@ namespace CurrentMonitor
                     catch (Exception ex)
                     {
                         string msg = ex.Message;
-                        toolStripStatusLabel1.Text = msg;
                     }
                 }
             }
@@ -105,8 +102,6 @@ namespace CurrentMonitor
             label_v_min.Text = "";
 
             label_results.Text = "";
-
-            toolStripStatusLabel1.Text = "";
 
             openPorts();
         }
@@ -179,46 +174,15 @@ namespace CurrentMonitor
 
         void processData(string[] data)
         {
-            // Timestamp
             string timestamp_str = data[0];
-            syncLabelSetText(label_timestamp, timestamp_str);
-
-            // Voltage
-            double voltage = 0;
-            voltage = Convert.ToDouble(data[2]);
-
-            if (Double.IsNaN(_volatge_act_max)) _volatge_act_max = voltage;
-            else if (voltage > _volatge_act_max) _volatge_act_max = voltage;
-            if (Double.IsNaN(_volatge_act_min)) _volatge_act_min = voltage;
-            else if (voltage < _volatge_act_min) _volatge_act_min = voltage;
-
-            Color forcolor = Color.Green;
-            if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
-                forcolor = Color.Red;
-            string text = string.Format("{0:F3} V", voltage);
-
-            syncLabelSetTextAndColor(label_v_act, text, forcolor);
-            syncLabelSetText(label_v_max, string.Format("{0:F3} V", _volatge_act_max));
-            syncLabelSetText(label_v_min, string.Format("{0:F3} V", _volatge_act_min));
-
-
-            // Current
+            double voltage = Convert.ToDouble(data[2]);
             double current = Convert.ToDouble(data[3]);
-
-            if (Double.IsNaN(_current_act_max)) _current_act_max = current;
-            else if (current > _current_act_max) _current_act_max = current;
-
-            if (Double.IsNaN(_current_act_min)) _current_act_min = current;
-            else if (current < _current_act_min) _current_act_min = current;
-
-            syncLabelSetText(label_i_act, ToSIPrefixedString(current) + "A");
-            syncLabelSetText(label_i_max, ToSIPrefixedString(_current_act_max) + "A");
-            syncLabelSetText(label_i_min, ToSIPrefixedString(_current_act_min) + "A");
+            measurementsDisplay(timestamp_str, voltage, current);
 
             // Checks
             States state = getState(voltage: voltage, current: current);
-            forcolor = Color.Black;
-            text = "Testing...";
+            Color forcolor = Color.Black;
+            string text = "Testing...";
             if (state == States.No_Power)
             {
                 forcolor = Color.Red;
@@ -271,6 +235,42 @@ namespace CurrentMonitor
                 _ee203.Zero();
             }
             _last_state = state;
+        }
+
+        void measurementsDisplay(string timestamp_str, double voltage, double current)
+        {
+
+            if (!groupBox1.Visible)
+                return;
+
+            syncLabelSetText(label_timestamp, timestamp_str);
+
+            // Voltage
+            if (Double.IsNaN(_volatge_act_max)) _volatge_act_max = voltage;
+            else if (voltage > _volatge_act_max) _volatge_act_max = voltage;
+            if (Double.IsNaN(_volatge_act_min)) _volatge_act_min = voltage;
+            else if (voltage < _volatge_act_min) _volatge_act_min = voltage;
+
+            Color forcolor = Color.Green;
+            if (voltage > _volatge_exp_max || voltage < _volatge_exp_min)
+                forcolor = Color.Red;
+            string text = string.Format("{0:F3} V", voltage);
+
+            syncLabelSetTextAndColor(label_v_act, text, forcolor);
+            syncLabelSetText(label_v_max, string.Format("{0:F3} V", _volatge_act_max));
+            syncLabelSetText(label_v_min, string.Format("{0:F3} V", _volatge_act_min));
+
+            // Current
+            if (Double.IsNaN(_current_act_max)) _current_act_max = current;
+            else if (current > _current_act_max) _current_act_max = current;
+
+            if (Double.IsNaN(_current_act_min)) _current_act_min = current;
+            else if (current < _current_act_min) _current_act_min = current;
+
+            syncLabelSetText(label_i_act, ToSIPrefixedString(current) + "A");
+            syncLabelSetText(label_i_max, ToSIPrefixedString(_current_act_max) + "A");
+            syncLabelSetText(label_i_min, ToSIPrefixedString(_current_act_min) + "A");
+
         }
 
         States getState(double voltage, double current)
@@ -468,8 +468,21 @@ namespace CurrentMonitor
             _volatge_act_min = Double.NaN;
             _current_act_max = Double.NaN;
             _current_act_min = Double.NaN;
+
+            _ee203.Zero();
+            _last_state = States.Other;
+            label_results.Text = "";
         }
 
+        private void showMesurementsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            groupBox1.Visible = !groupBox1.Visible;
+            if (groupBox1.Visible)
+                showMesurementsToolStripMenuItem.Text = "Hide Measurement";
+            else
+                showMesurementsToolStripMenuItem.Text = "Show Measurement";
+
+        }
     }
 }
 

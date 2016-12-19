@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            this.comboBox_serialPorts = new System.Windows.Forms.ComboBox();
             this.textBox_serialCommand = new System.Windows.Forms.TextBox();
             this.textBox_serialData = new System.Windows.Forms.TextBox();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -40,14 +39,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.contextMenuStrip_Chart.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // comboBox_serialPorts
-            // 
-            this.comboBox_serialPorts.FormattingEnabled = true;
-            this.comboBox_serialPorts.Location = new System.Drawing.Point(12, 12);
-            this.comboBox_serialPorts.Name = "comboBox_serialPorts";
-            this.comboBox_serialPorts.Size = new System.Drawing.Size(121, 21);
-            this.comboBox_serialPorts.TabIndex = 0;
             // 
             // textBox_serialCommand
             // 
@@ -82,9 +73,9 @@
             this.chart1.ContextMenuStrip = this.contextMenuStrip_Chart;
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            this.chart1.Location = new System.Drawing.Point(12, 52);
+            this.chart1.Location = new System.Drawing.Point(12, 12);
             this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(920, 287);
+            this.chart1.Size = new System.Drawing.Size(920, 327);
             this.chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             this.chart1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart1_MouseDoubleClick);
@@ -111,7 +102,6 @@
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.textBox_serialData);
             this.Controls.Add(this.textBox_serialCommand);
-            this.Controls.Add(this.comboBox_serialPorts);
             this.Name = "Form_Controller";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -125,8 +115,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.ComboBox comboBox_serialPorts;
         private System.Windows.Forms.TextBox textBox_serialCommand;
         private System.Windows.Forms.TextBox textBox_serialData;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;

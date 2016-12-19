@@ -170,9 +170,9 @@ namespace CurrentMonitor
 
         private void Watcher_EventArrived(object sender, EventArrivedEventArgs e)
         {
-            updateSerialPorts();
+            //updateSerialPorts();
         }
-
+/*
         void updateSerialPorts()
         {
             if (comboBox_serialPorts.InvokeRequired)
@@ -186,7 +186,7 @@ namespace CurrentMonitor
                 comboBox_serialPorts.Refresh();
             }
         }
-
+*/
         void controlSetProperty(Control control, object value, string property_name = "Text")
         {
             if (control.InvokeRequired)
