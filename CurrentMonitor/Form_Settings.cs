@@ -35,7 +35,7 @@ namespace CurrentMonitor
             tooltip.SetToolTip(label_voltage_value, caption);
             tooltip.SetToolTip(textBox_voltage_value, caption);
             textBox_voltage_value.Text = Utils.ToSIPrefixedString(
-                Properties.Settings.Default.Voltage_Value) + " V";
+                Properties.Settings.Default.Voltage_Value) + "V";
 
             textBox_voltage_tolarance.Text = Properties.Settings.Default.Voltage_Tolarance.ToString();
 
@@ -43,25 +43,25 @@ namespace CurrentMonitor
             tooltip.SetToolTip(label_off_thresdhold, caption);
             tooltip.SetToolTip(textBox_off_thresdhold, caption);
             textBox_off_thresdhold.Text = Utils.ToSIPrefixedString(
-                Properties.Settings.Default.Voltage_Off_Threshold) + " V";
+                Properties.Settings.Default.Voltage_Off_Threshold) + "V";
 
             caption = "Current level below this value considered as device not detected\r\nUsually set to 200 nA or less";
             tooltip.SetToolTip(textBox_nodevice_threshold, caption);
             tooltip.SetToolTip(label_nodevice_threshold, caption);
             textBox_nodevice_threshold.Text = Utils.ToSIPrefixedString(
-                Properties.Settings.Default.Current_NoDevice_Threshold) + " A";
+                Properties.Settings.Default.Current_NoDevice_Threshold) + "A";
 
             caption = "Current level below this value considered as device is in sleep mode\r\nUsually set to 200 uA or less";
             tooltip.SetToolTip(textBox_sleep_threshold, caption);
             tooltip.SetToolTip(label_sleep_threshold, caption);
             textBox_sleep_threshold.Text = Utils.ToSIPrefixedString(
-                Properties.Settings.Default.Current_Sleep_Threshold) + " A";
+                Properties.Settings.Default.Current_Sleep_Threshold) + "A";
 
             caption = "Current level above this value considered as device is in high current mode\r\nUsually set to 10 mA or more";
             tooltip.SetToolTip(textBox_current_high, caption);
             tooltip.SetToolTip(label_current_high, caption);
             textBox_current_high.Text = Utils.ToSIPrefixedString(
-                Properties.Settings.Default.Current_High_Threshold) + " A";
+                Properties.Settings.Default.Current_High_Threshold) + "A";
 
         }
 
@@ -120,7 +120,7 @@ namespace CurrentMonitor
             try
             {
                 Properties.Settings.Default.Current_High_Threshold =
-                    Convert.ToDouble(textBox_current_high.Text);
+                    convertToDouble(textBox_current_high.Text);
             }
             catch (FormatException) { };
         }
@@ -133,6 +133,37 @@ namespace CurrentMonitor
         private void textBox_dataPortName_TextChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.Data_Port_Name = textBox_dataPortName.Text;
+        }
+
+        double convertToDouble(string data)
+        {
+            double m = 1.0;
+            int i = data.IndexOf('m');
+            if (i > 0)
+                m = 1e-3;
+            else
+            {
+                i = data.IndexOf('u');
+                if (i > 0)
+                    m = 1e-6;
+                else
+                {
+                    i = data.IndexOf('n');
+                    if (i > 0)
+                        m = 1e-9;
+                }
+            }
+
+            double value = 0;
+            if (i > 0)
+            {
+                string numstr = data.Substring(0, i - 1).Trim();
+                value = Convert.ToDouble(numstr) * m;
+            }
+            else
+                value = Convert.ToDouble(data);
+
+            return value;
         }
     }
 }

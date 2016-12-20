@@ -40,6 +40,8 @@ namespace CurrentMonitor
         {
             InitializeComponent();
 
+            //string[] ports = ee203.GetComPortNames("USB Serial Device");
+
             double value = Properties.Settings.Default.Voltage_Value;
             double tolarance = Properties.Settings.Default.Voltage_Tolarance;
             _volatge_exp_max = value + tolarance * value / 100;
@@ -246,7 +248,6 @@ namespace CurrentMonitor
 
         void measurementsDisplay(string timestamp_str, double voltage, double current)
         {
-
             if (!groupBox1.Visible)
                 return;
 
