@@ -26,9 +26,10 @@ namespace CurrentMonitor
         double _current_act_max = Double.NaN;
         double _current_act_min = Double.NaN;
 
-        //        bool _device_removed = true;
         bool _sleep_detected = false;
         TimeSpan _sleep_start = TimeSpan.MaxValue;
+
+        Task _task_openPorts;
 
         enum States { No_Power, Bad_Power, No_Device, Sleep, On, Other };
         States _last_state = States.Other;
@@ -50,8 +51,6 @@ namespace CurrentMonitor
             _ee203 = new ee203(
                 cmd_port_name: Properties.Settings.Default.Cmd_Port_Name,
                 data_port_name: Properties.Settings.Default.Data_Port_Name);
-
-            //_ee203.CmdPort_Data_Event += _ee203_CmdPort_Data_Event;
             _ee203.DataPort_Data_Event += _ee203_DataPort_Data_Event;
 
         }
@@ -89,10 +88,33 @@ namespace CurrentMonitor
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Save the port settings to see whether they changed
+            string cmdPortName = Properties.Settings.Default.Cmd_Port_Name;
+            string dataPortName = Properties.Settings.Default.Data_Port_Name;
+
             Form_Settings dlg = new Form_Settings();
             DialogResult res = dlg.ShowDialog();
             if (res == DialogResult.OK)
+            {
                 Properties.Settings.Default.Reload();
+
+                if (cmdPortName != Properties.Settings.Default.Cmd_Port_Name ||
+                   dataPortName != Properties.Settings.Default.Data_Port_Name)
+                {
+                    _ee203.DataPort_Data_Event -= _ee203_DataPort_Data_Event;
+
+                    Task close_ports = new Task(() => closePorts());
+                    close_ports.Start();
+
+                    _ee203 = new ee203(
+                        cmd_port_name: Properties.Settings.Default.Cmd_Port_Name,
+                        data_port_name: Properties.Settings.Default.Data_Port_Name);
+                    _ee203.DataPort_Data_Event += _ee203_DataPort_Data_Event;
+
+                    _task_openPorts = new Task(() => openPorts());
+                    _task_openPorts.Start();
+                }
+            }
         }
 
         private void Form_Main_Load(object sender, EventArgs e)
@@ -107,7 +129,13 @@ namespace CurrentMonitor
 
             label_results.Text = "";
 
-            openPorts();
+            Task _task_openPorts = new Task(() => openPorts());
+            _task_openPorts.Start();
+        }
+
+        bool arePortsOpen()
+        {
+            return (_cmd_port != null && _data_port != null && _cmd_port.IsOpen && _data_port.IsOpen);
         }
 
         void openPorts()
@@ -134,7 +162,8 @@ namespace CurrentMonitor
                 }
             }
 
-            if (_cmd_port.IsOpen)
+
+            if (_cmd_port != null && _cmd_port.IsOpen)
             {
                 while (true)
                 {
@@ -192,7 +221,7 @@ namespace CurrentMonitor
                 forcolor = Color.Red;
                 text = "No voltage detected.  Is power supply on and connected?";
             }
-            else if(state == States.Bad_Power)
+            else if (state == States.Bad_Power)
             {
                 forcolor = Color.Red;
                 text = "Volatge out of range.  Please adjust power supply";
@@ -390,7 +419,8 @@ namespace CurrentMonitor
             _current_act_max = Double.NaN;
             _current_act_min = Double.NaN;
 
-            _ee203.Zero();
+            if (_cmd_port != null && _cmd_port.IsOpen)
+                _ee203.Zero();
             _last_state = States.Other;
             label_results.Text = "";
         }

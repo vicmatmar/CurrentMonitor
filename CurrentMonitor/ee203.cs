@@ -124,8 +124,16 @@ namespace CurrentMonitor
 
         public void ClosePorts()
         {
-            _cmd_port.Close();
-            _data_port.Close();
+            if (_data_port != null && _data_port.IsOpen)
+            {
+                if(_cmd_port != null && _cmd_port.IsOpen)
+                    this.Pause();
+                _data_port.Close();
+            }
+
+            if (_cmd_port != null && _cmd_port.IsOpen)
+                _cmd_port.Close();
+
         }
 
         public SerialPort OpenCmdPort()

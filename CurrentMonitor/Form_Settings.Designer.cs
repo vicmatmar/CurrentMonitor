@@ -42,13 +42,13 @@
             this.textBox_off_thresdhold = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBox_current_high = new System.Windows.Forms.TextBox();
+            this.label_current_high = new System.Windows.Forms.Label();
             this.textBox_sleep_threshold = new System.Windows.Forms.TextBox();
             this.label_sleep_threshold = new System.Windows.Forms.Label();
             this.textBox_nodevice_threshold = new System.Windows.Forms.TextBox();
             this.label_nodevice_threshold = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label_current_high = new System.Windows.Forms.Label();
-            this.textBox_current_high = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -92,6 +92,7 @@
             // 
             // button_ok
             // 
+            this.button_ok.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.button_ok.Location = new System.Drawing.Point(83, 315);
             this.button_ok.Name = "button_ok";
             this.button_ok.Size = new System.Drawing.Size(75, 23);
@@ -193,6 +194,24 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Current";
             // 
+            // textBox_current_high
+            // 
+            this.textBox_current_high.Location = new System.Drawing.Point(146, 75);
+            this.textBox_current_high.Name = "textBox_current_high";
+            this.textBox_current_high.Size = new System.Drawing.Size(61, 20);
+            this.textBox_current_high.TabIndex = 16;
+            this.textBox_current_high.Text = "10E-3";
+            this.textBox_current_high.TextChanged += new System.EventHandler(this.textBox_current_high_TextChanged);
+            // 
+            // label_current_high
+            // 
+            this.label_current_high.AutoSize = true;
+            this.label_current_high.Location = new System.Drawing.Point(9, 78);
+            this.label_current_high.Name = "label_current_high";
+            this.label_current_high.Size = new System.Drawing.Size(119, 13);
+            this.label_current_high.TabIndex = 15;
+            this.label_current_high.Text = "High Current Threshold:";
+            // 
             // textBox_sleep_threshold
             // 
             this.textBox_sleep_threshold.Location = new System.Drawing.Point(146, 45);
@@ -241,24 +260,6 @@
             this.groupBox3.TabIndex = 14;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Serial Ports";
-            // 
-            // label_current_high
-            // 
-            this.label_current_high.AutoSize = true;
-            this.label_current_high.Location = new System.Drawing.Point(9, 78);
-            this.label_current_high.Name = "label_current_high";
-            this.label_current_high.Size = new System.Drawing.Size(119, 13);
-            this.label_current_high.TabIndex = 15;
-            this.label_current_high.Text = "High Current Threshold:";
-            // 
-            // textBox_current_high
-            // 
-            this.textBox_current_high.Location = new System.Drawing.Point(146, 75);
-            this.textBox_current_high.Name = "textBox_current_high";
-            this.textBox_current_high.Size = new System.Drawing.Size(61, 20);
-            this.textBox_current_high.TabIndex = 16;
-            this.textBox_current_high.Text = "10E-3";
-            this.textBox_current_high.TextChanged += new System.EventHandler(this.textBox_current_high_TextChanged);
             // 
             // Form_Settings
             // 

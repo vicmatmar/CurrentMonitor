@@ -71,9 +71,6 @@ namespace CurrentMonitor
             Properties.Settings.Default.Data_Port_Name = textBox_dataPortName.Text;
 
             Properties.Settings.Default.Save();
-
-            Close();
-
         }
 
         private void textBox_voltage_value_TextChanged(object sender, EventArgs e)
