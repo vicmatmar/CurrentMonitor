@@ -43,11 +43,6 @@ namespace CurrentMonitor
 
             //string[] ports = ee203.GetComPortNames("USB Serial Device");
 
-            double value = Properties.Settings.Default.Voltage_Value;
-            double tolarance = Properties.Settings.Default.Voltage_Tolarance;
-            _volatge_exp_max = value + tolarance * value / 100;
-            _volatge_exp_min = value - tolarance * value / 100;
-
             _ee203 = new ee203(
                 cmd_port_name: Properties.Settings.Default.Cmd_Port_Name,
                 data_port_name: Properties.Settings.Default.Data_Port_Name);
@@ -312,6 +307,11 @@ namespace CurrentMonitor
 
         States getState(double voltage, double current)
         {
+            double voltage_exp_value = Properties.Settings.Default.Voltage_Value;
+            double voltage_tolarance = Properties.Settings.Default.Voltage_Tolarance;
+            _volatge_exp_max = voltage_exp_value + voltage_tolarance * voltage_exp_value / 100;
+            _volatge_exp_min = voltage_exp_value - voltage_tolarance * voltage_exp_value / 100;
+
             double nodi = Properties.Settings.Default.Current_NoDevice_Threshold;
             States state = States.Other;
             if (voltage <= Properties.Settings.Default.Voltage_Off_Threshold)

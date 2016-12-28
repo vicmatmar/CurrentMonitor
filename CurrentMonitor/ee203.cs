@@ -128,6 +128,7 @@ namespace CurrentMonitor
             {
                 if(_cmd_port != null && _cmd_port.IsOpen)
                     this.Pause();
+                _data_port.ReadExisting();
                 _data_port.Close();
             }
 
