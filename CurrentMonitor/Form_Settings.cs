@@ -77,8 +77,8 @@ namespace CurrentMonitor
         {
             try
             {
-                Properties.Settings.Default.Voltage_Value =
-                    Convert.ToDouble(textBox_voltage_value.Text);
+                double value = convertToDouble(textBox_voltage_value.Text);
+                Properties.Settings.Default.Voltage_Value = value;
             }
             catch (FormatException) { };
         }
@@ -87,8 +87,8 @@ namespace CurrentMonitor
         {
             try
             {
-                Properties.Settings.Default.Voltage_Off_Threshold =
-                    Convert.ToDouble(textBox_off_thresdhold.Text);
+                double value = convertToDouble(textBox_off_thresdhold.Text);
+                Properties.Settings.Default.Voltage_Off_Threshold = value;
             }
             catch (FormatException) { };
         }
@@ -96,8 +96,8 @@ namespace CurrentMonitor
         {
             try
             {
-                Properties.Settings.Default.Current_NoDevice_Threshold =
-                    Convert.ToDouble(textBox_nodevice_threshold.Text);
+                double value = convertToDouble(textBox_nodevice_threshold.Text);
+                Properties.Settings.Default.Current_NoDevice_Threshold = value;
             }
             catch (FormatException) { };
         }
@@ -106,8 +106,8 @@ namespace CurrentMonitor
         {
             try
             {
-                Properties.Settings.Default.Current_Sleep_Threshold =
-                    Convert.ToDouble(textBox_sleep_threshold.Text);
+                double value = convertToDouble(textBox_sleep_threshold.Text);
+                Properties.Settings.Default.Current_Sleep_Threshold = value;
             }
             catch (FormatException) { };
         }
@@ -116,8 +116,8 @@ namespace CurrentMonitor
         {
             try
             {
-                Properties.Settings.Default.Current_High_Threshold =
-                    convertToDouble(textBox_current_high.Text);
+                double value = convertToDouble(textBox_current_high.Text);
+                Properties.Settings.Default.Current_High_Threshold = value;
             }
             catch (FormatException) { };
         }
